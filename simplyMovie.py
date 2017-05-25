@@ -12,7 +12,7 @@ class SimplyMovie:
         self.master = master
 
         # menuBar
-        self.menubar = tk.Menu(self)
+        self.menubar = tk.Menu(self.master)
         self.menu_fichier = tk.Menu(self.menubar, tearoff=0)
         self.menu_fichier.add_command(label="Quitter", command=self.fermer_appli)
         self.menu_film = tk.Menu(self.menubar, tearoff=0)
@@ -25,11 +25,10 @@ class SimplyMovie:
         self.frame_principale = vuePrincipale(self.master)
         self.frame_principale.pack(side="top")
 
-
     def ajouter_film(self):
-        ajouter_film_fenetre = tk.Toplevel(self.master)
-        ajouter_film_frame = vueAjouterFilm(ajouter_film_fenetre)
-        ajouter_film_frame.pack()
+        self.ajouter_film_fenetre = tk.Toplevel(self.master)
+        self.ajouter_film_frame = vueAjouterFilm(self.ajouter_film_fenetre)
+        self.ajouter_film_frame.pack()
 
     def fermer_appli(self):
         self.master.quit()
@@ -37,11 +36,11 @@ class SimplyMovie:
 
 def main():
     init_database()
-    fenetre_appli = tk.Tk()
-    fenetre_appli.wm_title("Simply Movie")
-    fenetre_appli.minsize(450, 300)
-    app = SimplyMovie(fenetre_appli)
-    fenetre_appli.mainloop()
+    root = tk.Tk()
+    root.wm_title("Simply Movie")
+    root.minsize(450, 300)
+    app = SimplyMovie(root)
+    root.mainloop()
 
 
 if __name__ == '__main__':

@@ -10,45 +10,45 @@ from PIL import Image, ImageTk
 class vueAjouterFilm(tk.Frame):
 
     def __init__(self, parent, *args, **kwargs):
-        #tk.Frame.__init__(self, parent, *args, **kwargs)
+        tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
 
         # frames des informations complémentaires
-        frame_infos = tk.LabelFrame(self, text="Informations supplémentaires", padx=20, pady=20)
-        frame_upper = tk.LabelFrame(frame_infos)
-        frame_etat = tk.Frame(frame_upper, borderwidth=2, relief=tk.GROOVE)
-        frame_type = tk.Frame(frame_upper, borderwidth=2, relief=tk.GROOVE)
+        self.frame_infos = tk.LabelFrame(self, text="Informations supplémentaires", padx=20, pady=20)
+        self.frame_upper = tk.LabelFrame(self.frame_infos)
+        self.frame_etat = tk.Frame(self.frame_upper, borderwidth=2, relief=tk.GROOVE)
+        self.frame_type = tk.Frame(self.frame_upper, borderwidth=2, relief=tk.GROOVE)
 
-        self.checkbox_a_acheter =tk.Checkbutton(frame_etat, text="A acheter")
-        self.checkbox_a_voir = tk.Checkbutton(frame_etat, text="A voir")
+        self.checkbox_a_acheter =tk.Checkbutton(self.frame_etat, text="A acheter")
+        self.checkbox_a_voir = tk.Checkbutton(self.frame_etat, text="A voir")
 
         self.var = tk.IntVar()
-        radio_film = tk.Radiobutton(frame_type, text="Film", variable=self.var, value=type_film['FILM'])
-        radio_serie = tk.Radiobutton(frame_type, text="Serie", variable=self.var, value=type_film['SERIE'])
-        radio_docu = tk.Radiobutton(frame_type, text="Documentaire", variable=self.var, value=type_film['DOCUMENTAIRE'])
-        radio_anim = tk.Radiobutton(frame_type, text="Animation", variable=self.var, value=type_film['ANIMATION'])
-        radio_spectacle = tk.Radiobutton(frame_type, text="Spectacle ou concert", variable=self.var, value=type_film['SPECTACLE'])
+        self.radio_film = tk.Radiobutton(self.frame_type, text="Film", variable=self.var, value=type_film['FILM'])
+        self.radio_serie = tk.Radiobutton(self.frame_type, text="Serie", variable=self.var, value=type_film['SERIE'])
+        self.radio_docu = tk.Radiobutton(self.frame_type, text="Documentaire", variable=self.var, value=type_film['DOCUMENTAIRE'])
+        self.radio_anim = tk.Radiobutton(self.frame_type, text="Animation", variable=self.var, value=type_film['ANIMATION'])
+        self.radio_spectacle = tk.Radiobutton(self.frame_type, text="Spectacle ou concert", variable=self.var, value=type_film['SPECTACLE'])
 
         self.value_titre = tk.StringVar(value="interstellar")
-        entree_titre = tk.Entry(frame_infos, textvariable=self.value_titre, width=30)
+        self.entree_titre = tk.Entry(self.frame_infos, textvariable=self.value_titre, width=30)
 
-        self.rechercher_bouton = tk.Button(frame_infos, text="Rechercher",command=self.lancer_recherche)
+        self.rechercher_bouton = tk.Button(self.frame_infos, text="Rechercher",command=self.lancer_recherche)
 
         self.checkbox_a_acheter.pack(anchor=tk.W)
         self.checkbox_a_voir.pack(anchor=tk.W)
-        radio_film.pack(anchor=tk.W)
-        radio_serie.pack(anchor=tk.W)
-        radio_docu.pack(anchor=tk.W)
-        radio_anim.pack(anchor=tk.W)
-        radio_spectacle.pack(anchor=tk.W)
-        frame_etat.pack(expand="yes", side=tk.LEFT)
-        frame_type.pack(expand="yes", side=tk.RIGHT)
-        frame_upper.pack(expand="yes", side=tk.TOP)
+        self.radio_film.pack(anchor=tk.W)
+        self.radio_serie.pack(anchor=tk.W)
+        self.radio_docu.pack(anchor=tk.W)
+        self.radio_anim.pack(anchor=tk.W)
+        self.radio_spectacle.pack(anchor=tk.W)
+        self.frame_etat.pack(expand="yes", side=tk.LEFT)
+        self.frame_type.pack(expand="yes", side=tk.RIGHT)
+        self.frame_upper.pack(expand="yes", side=tk.TOP)
         self.rechercher_bouton.pack(side=tk.BOTTOM)
-        entree_titre.pack(expand="yes", side=tk.BOTTOM)
-        frame_infos.pack(fill="both", expand="yes", side=tk.TOP)
+        self.entree_titre.pack(expand="yes", side=tk.BOTTOM)
+        self.frame_infos.pack(fill="both", expand="yes", side=tk.TOP)
 
-        self.frame_resulat = tk.Frame()
+        self.frame_resulat = tk.Frame(self)
         self.liste_film = tk.Listbox(self.frame_resulat)
         self.frame_affiche_movie = tk.Frame(self.frame_resulat)
 
@@ -70,17 +70,17 @@ class vueAjouterFilm(tk.Frame):
         data = self.liste_resultat[selected_index]
         img = ImageTk.PhotoImage(resizeimage.resize_thumbnail(data[0], [400, 200]))
 
-        bouton_ajouter = tk.Button(self.frame_affiche_movie,text="Ajouter à ma collection")
-        bouton_ajouter.bind("<Button-1>", lambda event : self.ajouterFilm(event,data[2]))
-        label = tk.Label(self.frame_affiche_movie,image=img)
-        label.image = img
-        label.pack(side=tk.TOP)
+        self.bouton_ajouter = tk.Button(self.frame_affiche_movie,text="Ajouter à ma collection")
+        self.bouton_ajouter.bind("<Button-1>", lambda event : self.ajouterFilm(event,data[2]))
+        self.label = tk.Label(self.frame_affiche_movie,image=img)
+        self.label.image = img
+        self.label.pack(side=tk.TOP)
         self.frame_affiche_movie.pack(side=tk.RIGHT)
-        bouton_ajouter.pack(side=tk.BOTTOM)
+        self.bouton_ajouter.pack(side=tk.BOTTOM)
 
     def ajouterFilm(self,event,id):
         film, casting, affiche = get_data(search_db['GET_TV'] if self.var.get == type_film['SERIE'] else search_db['GET_MOVIE'],id)
-        ajouter_film(film,casting,self.var.get,True,False,affiche)
+        ajouter_film(film,casting,self.var.get(),True,False,affiche)
         return None
 
 
