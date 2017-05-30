@@ -7,7 +7,9 @@ from models import init_database
 
 
 class SimplyMovie:
-
+    """
+        Classe principale de l'application
+    """
     def __init__(self, master):
         self.master = master
 
@@ -23,18 +25,27 @@ class SimplyMovie:
         # fenetre
         self.master.config(menu=self.menubar)
         self.frame_principale = vuePrincipale(self.master)
-        self.frame_principale.pack(side="top")
+        self.frame_principale.pack()
 
     def ajouter_film(self):
+        """
+            Démarre la vue pour ajouter un film à partir d'une recherche internet
+        """
         self.ajouter_film_fenetre = tk.Toplevel(self.master)
         self.ajouter_film_frame = vueAjouterFilm(self.ajouter_film_fenetre)
         self.ajouter_film_frame.pack()
 
     def fermer_appli(self):
+        """
+            Ferme l'application
+        """
         self.master.quit()
 
 
 def main():
+    """
+        Méthode de démarrage de l'application
+    """
     init_database()
     root = tk.Tk()
     root.wm_title("Simply Movie")

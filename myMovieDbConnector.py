@@ -1,3 +1,4 @@
+#!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 from urllib.request import urlopen
 import requests
@@ -51,6 +52,12 @@ search_db = {
 
 
 def __generate_url(search_type, query, page=0):
+    """
+        génère une url pour obtenir les résultats de my movie db, interroge le site et retourne le json
+        search_type fait référence au type de recherche indiqué par search_db
+        query est la donnée à passer en paramètre pour certaines recherche id de film, chaine de caractère à chercher...)
+        page est la page de recherche à obtenir pour les recherches avec plusieurs pages
+    """
     url_asking = __root_adress_db
 
     if search_db['GET_MOVIE'] == search_type:
@@ -110,24 +117,33 @@ def __generate_url(search_type, query, page=0):
         return data
 
 
-def __get_affiche(adresse):
+def get_affiche(adresse):
+    """
+        retourne l'image de l'affiche à partir de son adresse
+        adresse étant l'adresse web de l'image
+    """
     try :
         response = requests.get(__root_adress_affiche + adresse)
         return Image.open(BytesIO(response.content))
     except:
-        return None
-
+        return Image.open('afficheDefaut.jpg')
 
 def get_data(search_type, query, page=0):
-
+    """
+        permet d'obtenir les résultats en appelant une recherche sur myMovieDb
+        search_type fait référence au type de recherche indiqué par search_db
+        query est la donnée à passer en paramètre pour certaines recherche id de film, chaine de caractère à chercher...)
+        page est la page de recherche à obtenir pour les recherches avec plusieurs pages
+    """
     # récupération des données d'internet
+    #__generate_url get_data_offline
     data = __generate_url(search_type, query, page)
 
     # en cas de recherche
     if search_type in [search_db['SEARCH_MOVIE'], search_db['SEARCH_TV']]:
         liste_resultat = []
         for data_result in data['results'][:10]:
-            liste_resultat.append((__get_affiche(data_result['poster_path']), data_result['title'], data_result['id']))
+            liste_resultat.append((data_result['poster_path'], data_result['title'], data_result['id']))
         return liste_resultat
 
     # en cas de recherche de film ou de série
@@ -136,6 +152,23 @@ def get_data(search_type, query, page=0):
                                  if search_type == search_db['GET_TV'] else
                                  search_db['ASK_CASTING_MOVIE'], data['id'])
         return data, casting, __get_affiche(data['poster_path'])
+
+
+def get_data_offline(search_type, query, page=0):
+    
+    if search_type == search_db['SEARCH_MOVIE']:
+        return test_search_movie
+    if search_type == search_db['SEARCH_TV']:
+        return test_search_tv
+    if search_type == search_db['GET_MOVIE']:
+        return test_data_film
+    if search_type == search_db['GET_TV']:
+        return test_data_tv
+    if search_type == search_db['ASK_CASTING_TV']:
+        return test_casting_tv
+    if search_type == search_db['ASK_CASTING_MOVIE']:
+        return test_casting_movie
+
 
 
     
