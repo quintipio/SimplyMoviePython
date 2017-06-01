@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from models import type_film,ajouter_film
+from models import type_film, ajouter_film, ajouter_film_basique
 from myMovieDbConnector import get_data, search_db, get_affiche
 from resizeimage import resizeimage
 from PIL import Image, ImageTk
@@ -23,11 +23,13 @@ class vueAjouterFilm(tk.Frame):
         self.frame_type = tk.Frame(self.frame_upper, borderwidth=2, relief=tk.GROOVE)
 
         # checkbox à voir / à acheter 
-        self.checkbox_a_acheter =tk.Checkbutton(self.frame_etat, text="A acheter")
-        self.checkbox_a_voir = tk.Checkbutton(self.frame_etat, text="A voir")
+        self.var_a_acheter = tk.BooleanVar()
+        self.var_a_voir = tk.BooleanVar()
+        self.checkbox_a_acheter =tk.Checkbutton(self.frame_etat, text="A acheter",onvalue=True,offvalue=False,variable=self.var_a_acheter)
+        self.checkbox_a_voir = tk.Checkbutton(self.frame_etat, text="A voir",onvalue=True,offvalue=False,variable=self.var_a_voir)
 
         # type de film
-        self.var = tk.IntVar()
+        self.var = tk.IntVar(value=type_film['FILM'])
         self.radio_film = tk.Radiobutton(self.frame_type, text="Film", variable=self.var, value=type_film['FILM'])
         self.radio_serie = tk.Radiobutton(self.frame_type, text="Serie", variable=self.var, value=type_film['SERIE'])
         self.radio_docu = tk.Radiobutton(self.frame_type, text="Documentaire", variable=self.var, value=type_film['DOCUMENTAIRE'])
@@ -35,7 +37,7 @@ class vueAjouterFilm(tk.Frame):
         self.radio_spectacle = tk.Radiobutton(self.frame_type, text="Spectacle ou concert", variable=self.var, value=type_film['SPECTACLE'])
         
         # textbox de recherche
-        self.value_titre = tk.StringVar(value="interstellar")
+        self.value_titre = tk.StringVar()
         self.entree_titre = tk.Entry(self.frame_infos, textvariable=self.value_titre, width=30)
 
         #bouton de recherche
@@ -58,15 +60,22 @@ class vueAjouterFilm(tk.Frame):
 
         # éléments supplémentaires de la vue pas encore affiché
         self.frame_resulat = tk.Frame(self)
-        self.liste_film = tk.Listbox(self.frame_resulat)
+        self.liste_film = tk.Listbox(self.frame_resulat,width=30,height=10)
         self.frame_affiche_movie = tk.Frame(self.frame_resulat)
+
+        # scrollbar liste_film
+        self.scrollbar_liste = tk.Scrollbar(self.frame_resulat)
+        self.scrollbar_liste.pack(side=tk.RIGHT,fill=tk.Y)
+        self.liste_film.config(yscrollcommand=self.scrollbar_liste.set)
+        self.scrollbar_liste.config(command=self.liste_film.yview)
+
 
     def lancer_recherche(self):
         """
             Action de recherche d'un film sur internet et affichage des résultats
         """
         self.liste_film.delete(0,tk.END)
-        self.liste_resultat = get_data(search_db['SEARCH_TV'] if self.var.get == type_film['SERIE'] else search_db['SEARCH_MOVIE'], self.value_titre.get())
+        self.liste_resultat = get_data(search_db['SEARCH_TV'] if self.var.get() is type_film['SERIE'] else search_db['SEARCH_MOVIE'], self.value_titre.get())
 
         if len(self.liste_resultat) > 0:
             for result in self.liste_resultat:
@@ -76,7 +85,11 @@ class vueAjouterFilm(tk.Frame):
             self.liste_film.pack(side=tk.LEFT, anchor=tk.W)
             self.frame_resulat.pack()
         else:
-            messagebox.showwarning(title="Aucun résultat", message="Cette recherche n'a donnée aucun résultat")
+            result_question = messagebox.askquestion(title="Aucun résultat",message="Ce film est introuvable. Voulez vous quand même l'ajouter ?",icon="info")
+            if result_question == 'yes' :
+                ajouter_film_basique(titre=self.value_titre.get(),type=self.var.get(),a_acheter=self.var_a_acheter.get(),a_voir=self.var_a_voir.get())
+                self.parent.destroy()
+                
         
 
     def onselect_movie(self, evt,selected_index):
@@ -87,23 +100,22 @@ class vueAjouterFilm(tk.Frame):
         self.frame_affiche_movie = tk.Frame(self.frame_resulat)
         data = self.liste_resultat[selected_index]
         img = ImageTk.PhotoImage(resizeimage.resize_thumbnail(get_affiche(data[0]), [400, 200]))
-        self.bouton_ajouter = tk.Button(self.frame_affiche_movie,text="Ajouter à ma collection")
-        self.bouton_ajouter.bind("<Button-1>", lambda event : self.ajouterFilm(event,data[2]))
+        self.bouton_ajouter = tk.Button(self.frame_affiche_movie,text="Ajouter à ma collection",command= lambda: self.ajouterFilm(data[2]))
         self.label = tk.Label(self.frame_affiche_movie,image=img)
         self.label.image = img
         self.label.pack(side=tk.TOP)
         self.frame_affiche_movie.pack(side=tk.RIGHT)
         self.bouton_ajouter.pack(side=tk.BOTTOM)
 
-    def ajouterFilm(self,event,id):
+    def ajouterFilm(self,id):
         """
             Action d'ajout du film en base avec id, l'id du film à ajouter
         """
-        film, casting, affiche = get_data(search_db['GET_TV'] if self.var.get == type_film['SERIE'] else search_db['GET_MOVIE'],id)
-        resultat = ajouter_film(film,casting,self.var.get(),True,False,affiche)
+        film, casting, affiche = get_data(search_db['GET_TV'] if self.var.get() == type_film['SERIE'] else search_db['GET_MOVIE'],id)
+        resultat = ajouter_film(film,casting,self.var.get(),self.var_a_voir.get(),self.var_a_acheter.get(),affiche)
+        self.parent.destroy()
         if(resultat is not None) :
             messagebox.showerror(title="Erreur lors de l'ajout",message=resultat)
-        return None
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ class SimplyMovie:
 
         # fenetre
         self.master.config(menu=self.menubar)
-        self.frame_principale = vuePrincipale(self.master)
+        self.frame_principale = vuePrincipale(self.master,width=600,height=320)
         self.frame_principale.pack()
 
     def ajouter_film(self):
@@ -49,7 +49,7 @@ def main():
     init_database()
     root = tk.Tk()
     root.wm_title("Simply Movie")
-    root.minsize(450, 300)
+    root.minsize(300, 300)
     app = SimplyMovie(root)
     root.mainloop()
 
