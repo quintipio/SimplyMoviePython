@@ -57,14 +57,14 @@ class vuePrincipale(tk.Frame):
         if 1 is selected_index:
             self.categorie = type_recherche['A_VOIR']
             result = get_liste_film(type_recherche['A_VOIR'], self.selected_film, self.page_en_cours,resultat_par_page)
-        elif 2 is selected_index:
+        elif 0 is selected_index:
             self.categorie = type_recherche['A_ACHETER']
             result = get_liste_film(type_recherche['A_ACHETER'], self.selected_film, self.page_en_cours,resultat_par_page)
-        elif 3 is selected_index:
+        elif 2 is selected_index:
             self.categorie = 0
             result = get_liste_film(0,self.page_en_cours,resultat_par_page)
         
-        if selected_index in [1,2,3] :
+        if selected_index in [0,1,2] :
             i = 0
             for film in result:
                 self.label_titre = tk.Label(self.frame_result, text=film.titre)

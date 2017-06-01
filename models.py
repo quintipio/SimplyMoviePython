@@ -203,11 +203,11 @@ def supprimer_film(id_film) :
 
 
 @db_session
-def __verifier_film_en_base(id_internet):
+def __verifier_film_en_base(id_internet,type):
     """
         vérifie si un film est en base en le recherchant par son id internet
     """
-    return count(f for f in Film if f.id_internet == id_internet) > 0
+    return count(f for f in Film if f.id_internet == id_internet and f.type == type) > 0
 
 @db_session
 def __get_genre(genre):
@@ -253,7 +253,7 @@ def ajouter_film(data_film, data_casting, type, a_voir, a_acheter, affiche):
         a_acheter est un boolean pour indiquer si le film est à acheter
         affiche est l'image d el'affiche du film
     """
-    if __verifier_film_en_base(data_film['id']) is False:
+    if __verifier_film_en_base(data_film['id'],type) is False:
         producteurs = []
         realisateurs = []
         for data_result in data_casting['crew']:
@@ -282,9 +282,11 @@ def ajouter_film(data_film, data_casting, type, a_voir, a_acheter, affiche):
             producteurs=producteurs,
             realisateurs=realisateurs,
             collection=None if 'belongs_to_collection' not in data_film
+                               or ('belongs_to_collection' in data_film and data_film['belongs_to_collection'] is None)
             else __get_collection(data_film['belongs_to_collection'])
         )
 
+        roles = []
         for data_result in data_casting['cast'][:10]:
             roles.append(Role(film=film
                             , personne=(__get_personne(data_result))

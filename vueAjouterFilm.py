@@ -1,7 +1,6 @@
 #!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 import tkinter as tk
-from tkinter import ttk
 from tkinter import messagebox
 from models import type_film, ajouter_film, ajouter_film_basique
 from myMovieDbConnector import get_data, search_db, get_affiche
@@ -41,7 +40,7 @@ class vueAjouterFilm(tk.Frame):
         self.entree_titre = tk.Entry(self.frame_infos, textvariable=self.value_titre, width=30)
 
         #bouton de recherche
-        self.rechercher_bouton = ttk.Button(self.frame_infos, text="Rechercher",command=self.lancer_recherche)
+        self.rechercher_bouton = tk.Button(self.frame_infos, text="Rechercher",command=self.lancer_recherche)
 
         #mise en place des éléments
         self.checkbox_a_acheter.pack(anchor=tk.W)

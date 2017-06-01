@@ -1,7 +1,8 @@
 #!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 import tkinter as tk
-from models import type_recherche, get_film, get_type, supprimer_film
+from tkinter import messagebox
+from models import get_film, get_type, supprimer_film
 from PIL import Image, ImageTk
 from resizeimage import resizeimage
 import io
