@@ -97,9 +97,9 @@ class vuePrincipale(tk.Frame):
             nombre_page = result['total_pages']
             mode = mode_consultation['INTERNET']
 
-        self.charger_resultats(result, nombre_resultats, nombre_page, mode)
+        self.charger_resultats(result, nombre_resultats, nombre_page, mode, selected_film)
 
-    def charger_resultats(self, result, nombre_resultat, nombre_page, mode):
+    def charger_resultats(self, result, nombre_resultat, nombre_page, mode, type):
         """
             Charge les boutons de navigation de la pagination des résultats et les résultats
         """
@@ -115,12 +115,12 @@ class vuePrincipale(tk.Frame):
                 label_titre = tk.Label(self.frame_result, text=film.titre)
                 label_annee = tk.Label(self.frame_result, text=film.annee)
                 consulter_bouton = tk.Button(self.frame_result, text="Consulter",
-                                             command=lambda arg=(film.id, mode_consultation['LOCAL']):
+                                             command=lambda arg=(film.id, type, mode_consultation['LOCAL']):
                                              self.consulter_film(arg))
             elif mode is mode_consultation['INTERNET']:
                 label_titre = tk.Label(self.frame_result, text=film['title'] if 'title' in film else film['name'])
                 consulter_bouton = tk.Button(self.frame_result, text="Consulter",
-                                             command=lambda arg=(film['id'], mode_consultation['INTERNET']):
+                                             command=lambda arg=(film['id'], type, mode_consultation['INTERNET']):
                                              self.consulter_film(arg))
             label_titre.grid(row=i, column=0)
             if mode is mode_consultation['LOCAL']:
@@ -165,8 +165,9 @@ class vuePrincipale(tk.Frame):
             Démarre la vue de consultation d'un film
         """
         self.consulter_film_fenetre = tk.Toplevel(self.parent)
-        self.consulter_film_fenetre = vueConsulterFilm(self.consulter_film_fenetre, id_film=args[0],
-                                                       fenetre_appelante=self, mode=args[1])
+        self.consulter_film_fenetre = vueConsulterFilm(self.consulter_film_fenetre,
+                                                       id_film=args[0], type=args[1], mode=args[2],
+                                                       fenetre_appelante=self)
         self.consulter_film_fenetre.pack()
 
 

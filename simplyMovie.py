@@ -50,7 +50,7 @@ def main():
     root = tk.Tk()
     root.wm_title("Simply Movie")
     root.minsize(300, 300)
-    app = SimplyMovie(root)
+    SimplyMovie(root)
     root.mainloop()
 
 
