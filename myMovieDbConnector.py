@@ -8,7 +8,7 @@ from io import BytesIO
 import os
 import json
 
-__key_connector = "992dbaf67c503e14d78a11e5c5f610b0"
+__key_connector = ""
 __root_adress_affiche = "http://image.tmdb.org/t/p/original"
 __root_adress_actor = "https://image.tmdb.org/t/p/w640/"
 __root_adress_db = "https://api.themoviedb.org/3"
