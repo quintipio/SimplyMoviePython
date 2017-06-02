@@ -14,25 +14,25 @@ __root_adress_actor = "https://image.tmdb.org/t/p/w640/"
 __root_adress_db = "https://api.themoviedb.org/3"
 
 search_db = {
-        'SEARCH_MOVIE': 1,
-        'GET_MOVIE': 2,
-        'ASK_POSTER_MOVIE': 3,
-        'ASK_CASTING_MOVIE': 4,
-        'SEARCH_TV': 5,
-        'GET_TV': 6,
-        'ASK_POSTER_TV': 7,
-        'ASK_CASTING_TV': 8,
-        'ASK_SIMILAR_FILM': 9,
-        'ASK_SIMILAR_TV': 10,
-        'GENERAL_SEARCH': 11,
-        'GET_PERSON': 12,
-        'GET_PERSON_CREDIT': 13,
-        'MOMENT_MOVIE': 14,
-        'POPULAR_MOVIE': 15,
-        'MOMENT_TV': 16,
-        'POPULAR_TV': 17,
-        'TV_SEASON': 18,
-        'GET_COLLECTION': 19,
+    'SEARCH_MOVIE': 1,
+    'GET_MOVIE': 2,
+    'ASK_POSTER_MOVIE': 3,
+    'ASK_CASTING_MOVIE': 4,
+    'SEARCH_TV': 5,
+    'GET_TV': 6,
+    'ASK_POSTER_TV': 7,
+    'ASK_CASTING_TV': 8,
+    'ASK_SIMILAR_FILM': 9,
+    'ASK_SIMILAR_TV': 10,
+    'GENERAL_SEARCH': 11,
+    'GET_PERSON': 12,
+    'GET_PERSON_CREDIT': 13,
+    'MOMENT_MOVIE': 14,
+    'POPULAR_MOVIE': 15,
+    'MOMENT_TV': 16,
+    'POPULAR_TV': 17,
+    'TV_SEASON': 18,
+    'GET_COLLECTION': 19,
 }
 
 
@@ -91,8 +91,10 @@ def __generate_url(search_type, query, page=0):
             or search_db['GENERAL_SEARCH'] == search_type:
         url_asking += "&query=" + query.replace(' ', '+')
 
-        if page > 0 and search_db['GENERAL_SEARCH'] == search_type:
-            url_asking += "&page={}".format(page)
+    if page > 0 and search_type in [search_db['GENERAL_SEARCH'],
+                                    search_db['MOMENT_MOVIE'], search_db['MOMENT_TV'],
+                                    search_db['POPULAR_MOVIE'], search_db['POPULAR_TV']]:
+        url_asking += "&page={}".format(page)
 
     url_asking += "&language={}".format(os.getenv('LANG'))
     url_asking += "&include_image_language={},null".format(os.getenv('LANG'));
@@ -107,11 +109,12 @@ def get_affiche(adresse):
         retourne l'image de l'affiche à partir de son adresse
         adresse étant l'adresse web de l'image
     """
-    try :
+    try:
         response = requests.get(__root_adress_affiche + adresse)
         return Image.open(BytesIO(response.content))
     except:
         return Image.open('afficheDefaut.jpg')
+
 
 def get_data(search_type, query, page=0):
     """
@@ -128,7 +131,8 @@ def get_data(search_type, query, page=0):
         liste_resultat = []
         for data_result in data['results']:
             liste_resultat.append((data_result['poster_path'],
-                                   data_result['name'] if search_type is search_db['SEARCH_TV'] else data_result['title'],
+                                   data_result['name'] if search_type is search_db['SEARCH_TV'] else data_result[
+                                       'title'],
                                    data_result['id']))
         return liste_resultat
 
@@ -139,11 +143,10 @@ def get_data(search_type, query, page=0):
                                  search_db['ASK_CASTING_MOVIE'], data['id'])
         return data, casting, get_affiche(data['poster_path'])
 
-def get_popular_movie(type) :
+
+def get_popular_movie(type_recherche,page):
     """
-        Retourne une liste de série ou de film populaire
+        Retourne une liste de série ou de film/série populaire ou du moment 
     """
-    if type is type_film['SERIE'] :
-        return None
-    else :
-        return None
+    results = __generate_url(type_recherche, None, page)
+    return results
