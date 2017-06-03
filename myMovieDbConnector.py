@@ -128,7 +128,7 @@ def get_data(search_type, query, page=0):
         :param search_type: fait référence au type de recherche indiqué par search_db
         :param query: est la donnée à passer en paramètre pour certaines recherche id de film, chaine de caractère à chercher...)
         :param page: est la page de recherche à obtenir pour les recherches avec plusieurs pages
-        :return retourne la liste des résultats en cas de recherche, ou un tuple film casting, affiche pour des données précise de film/série
+        :return: retourne la liste des résultats en cas de recherche, ou un tuple film casting, affiche pour des données précise de film/série
     """
     # récupération des données d'internet
     data = __get_data_from_mymoviedb(search_type, query, page)
@@ -151,12 +151,12 @@ def get_data(search_type, query, page=0):
         return data, casting, get_affiche(data['poster_path'])
 
 
-def get_popular_movie(type_recherche,page):
+def get_search_general(type_recherche, page,query=None):
     """
-        Retourne une liste de série ou de film/série populaire ou du moment 
+        Retourne une liste de série ou de film/série populaire ou du moment ou les résultats d'une recherche générale 
         :param type_recherche: le type de recherche à effectuer
         :param page: la page de résultats
-        :return une liste de résultats
+        :return: une liste de résultats
     """
-    results = __get_data_from_mymoviedb(type_recherche, None, page)
+    results = __get_data_from_mymoviedb(type_recherche, query, page)
     return results
