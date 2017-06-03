@@ -11,6 +11,10 @@ class SimplyMovie:
         Classe principale de l'application
     """
     def __init__(self, master):
+        """
+        Démarrage de la vue fenêtre et de la vue principale
+        :param master: objet parent
+        """
         self.master = master
 
         # menuBar

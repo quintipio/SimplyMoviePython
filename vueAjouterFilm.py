@@ -13,8 +13,15 @@ class vueAjouterFilm(tk.Frame):
         Module pour la fenêtre de recherche et d'ajout de films par internet
     """
     def __init__(self, parent, *args, **kwargs):
+        """
+        Initialisation de la frame d'ajout de film
+        :param parent: l'objet parent
+        :param args: argument de la frame
+        :param kwargs: arguments de la frame
+        """
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
+        self.to_destroy = None
         # frames des informations complémentaires
         self.frame_infos = tk.LabelFrame(self, text="Informations supplémentaires", padx=20, pady=20)
         self.frame_upper = tk.LabelFrame(self.frame_infos)
@@ -68,22 +75,66 @@ class vueAjouterFilm(tk.Frame):
         self.liste_film.config(yscrollcommand=self.scrollbar_liste.set)
         self.scrollbar_liste.config(command=self.liste_film.yview)
 
+    def charger_film(self, film_id, film_titre, affiche, type,fenetre_a_fermer):
+        """
+            Charge un film à partir de son id internet et de son type
+        :param film_id: l'id du film à charger
+        :param film_titre: le titre du film
+        :param affiche: l'affiche du film
+        :param type: le type de film (série, film,documentaire...)
+        :fenetre_a_fermer: l'objet à détruire lors de la validation 
+        """
+        self.to_destroy = fenetre_a_fermer
+        # verrouillage des éléments de type de film
+        if type is type_film['SERIE']:
+            self.var.set(type_film['SERIE'])
+            self.radio_film.config(state=tk.DISABLED)
+            self.radio_serie.config(state=tk.DISABLED)
+            self.radio_anim.config(state=tk.DISABLED)
+            self.radio_spectacle.config(state=tk.DISABLED)
+            self.radio_docu.config(state=tk.DISABLED)
+        else :
+            self.var.set(type_film['FILM'])
+            self.radio_serie.config(state=tk.DISABLED)
+        # verrouillage de la recherche
+        self.value_titre.set(film_titre)
+        self.entree_titre.config(state=tk.DISABLED)
+        self.rechercher_bouton.config(state=tk.DISABLED)
+
+        # verrouillage de la liste de résultats
+        self.liste_film.insert(tk.END, film_titre)
+        self.liste_film.config(state=tk.DISABLED)
+        self.liste_film.pack(side=tk.LEFT, anchor=tk.W)
+        self.frame_resulat.pack()
+
+        # affichage du résultat
+        self.frame_affiche_movie = tk.Frame(self.frame_resulat)
+
+        img = ImageTk.PhotoImage(resizeimage.resize_thumbnail(affiche, [400, 200]))
+        self.bouton_ajouter = tk.Button(self.frame_affiche_movie, text="Ajouter à ma collection",
+                                        command=lambda: self.ajouterFilm(film_id))
+        self.label = tk.Label(self.frame_affiche_movie, image=img)
+        self.label.image = img
+        self.label.pack(side=tk.TOP)
+        self.frame_affiche_movie.pack(side=tk.RIGHT)
+        self.bouton_ajouter.pack(side=tk.BOTTOM)
 
     def lancer_recherche(self):
         """
             Action de recherche d'un film sur internet et affichage des résultats
         """
+        # effacement des anciens résultats
         self.liste_film.delete(0,tk.END)
+        # obtention des nouveaux et mise en place dans la liste
         self.liste_resultat = get_data(search_db['SEARCH_TV'] if self.var.get() is type_film['SERIE'] else search_db['SEARCH_MOVIE'], self.value_titre.get())
-
         if len(self.liste_resultat) > 0:
             for result in self.liste_resultat:
                 self.liste_film.insert(tk.END,result[1])
-
             self.liste_film.bind('<<ListboxSelect>>', lambda event: self.onselect_movie(event,self.liste_film.curselection()[0]))
             self.liste_film.pack(side=tk.LEFT, anchor=tk.W)
             self.frame_resulat.pack()
         else:
+            # si aucun résultats, on propose d'ajouter le film en base avec les informations minimales
             result_question = messagebox.askquestion(title="Aucun résultat",message="Ce film est introuvable. Voulez vous quand même l'ajouter ?",icon="info")
             if result_question == 'yes' :
                 ajouter_film_basique(titre=self.value_titre.get(),type=self.var.get(),a_acheter=self.var_a_acheter.get(),a_voir=self.var_a_voir.get())
@@ -94,8 +145,12 @@ class vueAjouterFilm(tk.Frame):
     def onselect_movie(self, evt,selected_index):
         """
             Action d'affichage d'un film avant d'ajouter le film en base avec selected_index l'emplacement du résultat dans la liste de résultats
+            :param evt : évènement déclanchant la méthode
+            :param selected_index: index du film sélectionner dans la recherche
         """
+        # destruction de l'ancien résultat
         self.frame_affiche_movie.destroy()
+        # affichage des nouveaux
         self.frame_affiche_movie = tk.Frame(self.frame_resulat)
         data = self.liste_resultat[selected_index]
         img = ImageTk.PhotoImage(resizeimage.resize_thumbnail(get_affiche(data[0]), [400, 200]))
@@ -109,16 +164,12 @@ class vueAjouterFilm(tk.Frame):
     def ajouterFilm(self,id):
         """
             Action d'ajout du film en base avec id, l'id du film à ajouter
+            :param id: l'id internet du film à ajouter
         """
         film, casting, affiche = get_data(search_db['GET_TV'] if self.var.get() == type_film['SERIE'] else search_db['GET_MOVIE'],id)
         resultat = ajouter_film(film,casting,self.var.get(),self.var_a_voir.get(),self.var_a_acheter.get(),affiche)
         self.parent.destroy()
+        if self.to_destroy is not None:
+            self.to_destroy.destroy()
         if(resultat is not None) :
             messagebox.showerror(title="Erreur lors de l'ajout",message=resultat)
-
-
-if __name__ == "__main__":
-    vueAjouterFilmFrame = tk.Tk()
-    vueAjouterFilm(vueAjouterFilmFrame).pack(side="top", fill="both", expand=True)
-    vueAjouterFilmFrame.mainloop()
-

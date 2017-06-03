@@ -5,12 +5,14 @@ import io
 
 database = Database()
 
+# différents roles d'une personne pour un film
 role = {
     'ACTEUR': 1,
     'PRODUCTEUR': 2,
     'REALISATEUR': 3
 }
 
+# type de film dispo en base
 type_film = {
     'FILM': 1,
     'SERIE': 2,
@@ -19,14 +21,19 @@ type_film = {
     'ANIMATION': 5
 }
 
+#type de recherche en base
 type_recherche = {
-    'A_VOIR':1,
-    'A_ACHETER':2,
-    'CONNU':3,
+    'A_VOIR': 1,
+    'A_ACHETER': 2,
 }
 
 
-def get_type(id) :
+def get_type(id):
+    """
+    Converti l'id d'un type de film en string
+    :param id: l'id du type de film à convertir
+    :return: une string portant le nom du type
+    """
     if id is type_film['FILM']:
         return 'Film'
     elif id is type_film['SERIE']:
@@ -88,7 +95,6 @@ class Film(database.Entity):
     a_acheter = Optional(bool)
     id_internet = Optional(int)
     collection = Optional(Collection)
-        
 
 
 class Role(database.Entity):
@@ -112,107 +118,136 @@ def init_database():
 
 def __convert_image_to_byte_array(image):
     """
-        converti une image de la bibliothèque PIL en byteArray pour être blober
+    converti une image de la bibliothèque PIL en byteArray pour être blober
+    :param image: l'image à convertir
+    :return: un byte_array prêt à être blober
     """
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format='JPEG')
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
 
+
 @db_session
-def get_liste_film(type_recherche_param,type_film,page_num,page_size) :
+def get_liste_film(type_recherche_param, type_film_param, page_num, page_size):
     """
         retourne une liste de film recherché en fonction du paramètre "type_recherche_param" indiqué par "type_recherche"
+        :param type_recherche_param: paramètre indiquant quel type de recherche il faut effectuer sur la base
+        :param type_film_param: indique le type de film (série,documentaire,film....)
+        :param page_num: indique le numéro de page à consulter
+        :param page_size: indique le nombre d'éléments par page
+        :return une liste de tupe de resultats
     """
-    if type_recherche_param is type_recherche['A_VOIR'] :
-        result = select(f for f in Film if f.a_voir is True and f.a_acheter is not True and f.type is type_film).page(pagenum=page_num,pagesize=page_size)
+    if type_recherche_param is type_recherche['A_VOIR']:
+        result = select(f for f in Film if f.a_voir is True and f.a_acheter is not True and f.type is type_film_param).page(
+            pagenum=page_num, pagesize=page_size)
     elif type_recherche_param is type_recherche['A_ACHETER']:
-        result = select(f for f in Film if f.a_acheter is True and f.type is type_film).page(pagenum=page_num,pagesize=page_size)
+        result = select(f for f in Film if f.a_acheter is True and f.type is type_film_param).page(pagenum=page_num,
+                                                                                                   pagesize=page_size)
     elif type_recherche_param is 0:
-        result = select(f for f in Film if f.a_voir is not True and f.a_acheter is not True and f.type is type_film).page(pagenum=page_num,pagesize=page_size)
-    
+        result = select(
+            f for f in Film if f.a_voir is not True and f.a_acheter is not True and f.type is type_film_param).page(
+            pagenum=page_num, pagesize=page_size)
+
     retour = []
-    for tuple in result :
+    for tuple in result:
         retour.append(tuple)
     return retour
 
+
 @db_session
-def count_liste_film(type_recherche_param,type_film) :
+def count_liste_film(type_recherche_param, type_film):
     """
-        compte le nombre de film retourné en fonction du paramètre "type_recherche_param" indiqué par "type_recherche"
+        Compte le nombre de film retourné en fonction du paramètre "type_recherche_param" indiqué par "type_recherche"
+        :param type_recherche_param : le type de recherche à affectuer en base
+        :param type_film : le type de film à rechercher
+        :return le nombre de tuple en base correspondant aux critères en paramètres
     """
-    if type_recherche_param is type_recherche['A_VOIR'] :
+    if type_recherche_param is type_recherche['A_VOIR']:
         result = count(f for f in Film if f.a_voir is True and f.a_acheter is not True and f.type is type_film)
     elif type_recherche_param is type_recherche['A_ACHETER']:
         result = count(f for f in Film if f.a_acheter is True and f.type is type_film)
     elif type_recherche_param is 0:
         result = count(f for f in Film if f.a_voir is not True and f.a_acheter is not True and f.type is type_film)
     return result
-    
+
 
 @db_session
 def get_film(id):
     """
-        Retourne les données d'un film au format json
+        Retourne les données d'un film au format dictionary
+        :param : l'id du film recherché
+        :return: un film au format dictionary
     """
     film = Film.get(id=id)
-    
+
     retour = {
-        'id':film.id,
-        'titre':film.titre,
-        'annee':film.annee,
-        'type':film.type,
-        'a_acheter':film.a_acheter,
-        'a_voir':film.a_voir,
-        'synopsis':film.synopsis,
-        'saison':film.saison,
-        'affiche':film.affiche,
-        'note_gen':film.noteGen,
-        'id_internet':film.id_internet,
-        'duree':film.duree,
-        'collection':{'id':film.collection.id,'id_internet':film.collection.idInternet,'titre':film.collection.titre} if film.collection is not None else None,
+        'id': film.id,
+        'titre': film.titre,
+        'annee': film.annee,
+        'type': film.type,
+        'a_acheter': film.a_acheter,
+        'a_voir': film.a_voir,
+        'synopsis': film.synopsis,
+        'saison': film.saison,
+        'affiche': film.affiche,
+        'note_gen': film.noteGen,
+        'id_internet': film.id_internet,
+        'duree': film.duree,
+        'collection': {'id': film.collection.id, 'id_internet': film.collection.idInternet,
+                       'titre': film.collection.titre} if film.collection is not None else None,
     }
 
     list_genres = []
-    for genre in film.genres :
-        list_genres.append({'id':genre.id, 'titre':genre.titre,'id_internet':genre.idInternet})
-    retour['genres']=list_genres
+    for genre in film.genres:
+        list_genres.append({'id': genre.id, 'titre': genre.titre, 'id_internet': genre.idInternet})
+    retour['genres'] = list_genres
 
     list_producteurs = []
-    for producteur in film.producteurs :
-        list_producteurs.append({'id':producteur.id, 'nom':producteur.nom,'id_internet':producteur.idInternet})
-    retour['producteurs']=list_producteurs
+    for producteur in film.producteurs:
+        list_producteurs.append({'id': producteur.id, 'nom': producteur.nom, 'id_internet': producteur.idInternet})
+    retour['producteurs'] = list_producteurs
 
     list_realisateurs = []
-    for realisateur in film.realisateurs :
-        list_realisateurs.append({'id':realisateur.id, 'nom':realisateur.nom,'id_internet':realisateur.idInternet})
-    retour['realisateurs']=list_realisateurs
+    for realisateur in film.realisateurs:
+        list_realisateurs.append({'id': realisateur.id, 'nom': realisateur.nom, 'id_internet': realisateur.idInternet})
+    retour['realisateurs'] = list_realisateurs
 
     list_acteurs = []
-    for acteur in film.roles :
-        list_acteurs.append({'id':acteur.personne.id, 'nom':acteur.personne.nom,'id_internet':acteur.personne.idInternet,'role':acteur.nom_role})
-    retour['acteurs']=list_acteurs
+    for acteur in film.roles:
+        list_acteurs.append(
+            {'id': acteur.personne.id, 'nom': acteur.personne.nom, 'id_internet': acteur.personne.idInternet,
+             'role': acteur.nom_role})
+    retour['acteurs'] = list_acteurs
     return retour
 
+
 @db_session
-def supprimer_film(id_film) :
+def supprimer_film(id_film):
     """
         Supprime un film de la base de donnée
+        :param id_film: l'id du film à supprimer
     """
     Film[id_film].delete()
 
 
 @db_session
-def __verifier_film_en_base(id_internet,type):
+def verifier_film_en_base(id_internet, type):
     """
         vérifie si un film est en base en le recherchant par son id internet
+        :param id_internet: l'id internet du film à rechercher
+        :param type : le type de film à rechercher
+        :return: True si le film est présent
     """
     return count(f for f in Film if f.id_internet == id_internet and f.type == type) > 0
+
 
 @db_session
 def __get_genre(genre):
     """
         retourne un genre s'il existe déjà sinon le crée et retourne le résultat
+        :param genre: le genre à rechercher
+        :return: le genre trouvé ou crée
     """
     result = Genre.get(idInternet=genre['id'])
     if result is None:
@@ -224,6 +259,8 @@ def __get_genre(genre):
 def __get_personne(personne):
     """
         retourne une personne si elle existe déjà sinon la créee et retourne le résultat
+        :param personne: la personne à rechercher
+        :return: la personne trouvée ou créee
     """
     result = Personne.get(idInternet=personne['id'])
     if result is None:
@@ -235,6 +272,8 @@ def __get_personne(personne):
 def __get_collection(collection):
     """
         retourne une collection si elle existe déjà sinon la créee et retourne le résultat
+        :param collection: la collection à rechercher
+        :return: la collection trouvée ou créee
     """
     result = Collection.get(idInternet=collection['id'])
     if result is None:
@@ -246,14 +285,15 @@ def __get_collection(collection):
 def ajouter_film(data_film, data_casting, type, a_voir, a_acheter, affiche):
     """
         créer un film en base de donnée ou retourne une erreur s'il existe déja
-        data_film contient les données du film
-        data_casting contient les acteurs producteurs et réalisateurs
-        type fait référence à type_film
-        a_voir est un boolean pour indiquer si le film est à voir
-        a_acheter est un boolean pour indiquer si le film est à acheter
-        affiche est l'image d el'affiche du film
+        :param data_film: contient les données du film
+        :param data_casting : contient les acteurs producteurs et réalisateurs
+        :param type: fait référence à type_film
+        :param a_voir: est un boolean pour indiquer si le film est à voir
+        :param a_acheter: est un boolean pour indiquer si le film est à acheter
+        :param affiche: est l'image d el'affiche du film
+        :return: erreur s'il y a
     """
-    if __verifier_film_en_base(data_film['id'],type) is False:
+    if verifier_film_en_base(data_film['id'], type) is False:
         producteurs = []
         realisateurs = []
         for data_result in data_casting['crew']:
@@ -267,14 +307,14 @@ def ajouter_film(data_film, data_casting, type, a_voir, a_acheter, affiche):
             liste_genre.append(__get_genre(data_result))
 
         film = Film(
-            titre=data_film['title'] if type == type_film['FILM'] else data_film['name'],
-            duree=data_film['runtime'] if type == type_film['FILM'] else data_film['episode_run_time'][0],
-            annee=data_film['release_date'][:4] if type == type_film['FILM'] else data_film['first_air_date'][:4],
+            titre=data_film['name'] if type == type_film['SERIE'] else data_film['title'],
+            duree=data_film['episode_run_time'][0] if type == type_film['SERIE'] else data_film['runtime'],
+            annee=data_film['first_air_date'][:4] if type == type_film['SERIE'] else data_film['release_date'][:4],
             affiche=__convert_image_to_byte_array(affiche),
             id_internet=data_film['id'],
             synopsis=data_film['overview'],
             noteGen=data_film['vote_average'],
-            saison=0 if type == type_film['FILM'] else data_film['number_of_seasons'],
+            saison=data_film['number_of_seasons'] if type == type_film['SERIE'] else 0,
             genres=liste_genre,
             type=type,
             a_acheter=a_acheter,
@@ -289,18 +329,24 @@ def ajouter_film(data_film, data_casting, type, a_voir, a_acheter, affiche):
         roles = []
         for data_result in data_casting['cast'][:10]:
             roles.append(Role(film=film
-                            , personne=(__get_personne(data_result))
-                            , nom_role=data_result['character']))
+                              , personne=(__get_personne(data_result))
+                              , nom_role=data_result['character']))
         return None
     else:
         return "Ce film est déjà présent"
 
+
 @db_session
-def ajouter_film_basique(titre,type,a_acheter,a_voir) :
+def ajouter_film_basique(titre, type, a_acheter, a_voir):
     """
-        Ajoute les informations minimales pour un film
+        Ajoute un film avec le strict minimum d'informations
+        :param titre: le titre du film
+        :param type: le type du film
+        :param a_acheter: indique le boolean a_acheter
+        :param a_voir: indique le boolean a_voir
+        
     """
-    film = Film(
+    Film(
         titre=titre,
         duree=None,
         annee=None,
@@ -313,4 +359,3 @@ def ajouter_film_basique(titre,type,a_acheter,a_voir) :
         a_acheter=a_acheter,
         a_voir=a_voir,
     )
-    return None

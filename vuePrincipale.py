@@ -14,6 +14,12 @@ class vuePrincipale(tk.Frame):
      """
 
     def __init__(self, parent, *args, **kwargs):
+        """
+        Initialisation de frame de la vue principale
+        :param parent: object parent
+        :param args: arguments de la frame
+        :param kwargs: arguments de la frame
+        """
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.page_en_cours = 1
@@ -51,6 +57,9 @@ class vuePrincipale(tk.Frame):
         self.recherche_liste_film()
 
     def event_for_recherche(self):
+        """
+        Réinitialise une nouvelle recherche
+        """
         self.page_en_cours = 1
         self.recherche_liste_film()
 
@@ -73,7 +82,7 @@ class vuePrincipale(tk.Frame):
                                         resultat_par_page)
             elif 2 is selected_index:
                 categorie = 0
-                result = get_liste_film(0, self.page_en_cours, resultat_par_page)
+                result = get_liste_film(0,selected_film, self.page_en_cours, resultat_par_page)
             nombre_resultats = count_liste_film(categorie, selected_film)
             nombre_page = nombre_resultats // resultat_par_page
             if nombre_resultats % resultat_par_page > 0:
@@ -102,6 +111,10 @@ class vuePrincipale(tk.Frame):
     def charger_resultats(self, result, nombre_resultat, nombre_page, mode, type):
         """
             Charge les boutons de navigation de la pagination des résultats et les résultats
+            :param result: les résultats à afficher
+            :param nombre_resultat: le nombre de résultats total
+            :param mode: le mode de consultation de la fenêtre (internet ou local)
+            :param type: le type de films (série,films...)
         """
         # on efface la frame des résultats
         self.frame_result.destroy()
@@ -163,15 +176,10 @@ class vuePrincipale(tk.Frame):
     def consulter_film(self, args):
         """
             Démarre la vue de consultation d'un film
+            :param args: tuple pour l'affichage d'un film (l'id du film, son type, le mode d'ouverture de la fenetre)
         """
         self.consulter_film_fenetre = tk.Toplevel(self.parent)
         self.consulter_film_fenetre = vueConsulterFilm(self.consulter_film_fenetre,
                                                        id_film=args[0], type=args[1], mode=args[2],
                                                        fenetre_appelante=self)
         self.consulter_film_fenetre.pack()
-
-
-if __name__ == "__main__":
-    vuePrincipaleFrame = tk.Tk()
-    vuePrincipale(vuePrincipaleFrame).pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-    vuePrincipaleFrame.mainloop()

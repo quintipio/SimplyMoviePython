@@ -8,11 +8,16 @@ from io import BytesIO
 import os
 import json
 
+# clé de connexion à myMovieDb
 __key_connector = ""
+# adresse de base pour obtenir une affiche de film ou dé série
 __root_adress_affiche = "http://image.tmdb.org/t/p/original"
+# adresse de base pour obtenir la photo d'un acteur
 __root_adress_actor = "https://image.tmdb.org/t/p/w640/"
+#adresse de base pour obtenir un résultat de film ou de série
 __root_adress_db = "https://api.themoviedb.org/3"
 
+# différentes recherches prise en compte par la classe
 search_db = {
     'SEARCH_MOVIE': 1,
     'GET_MOVIE': 2,
@@ -36,12 +41,12 @@ search_db = {
 }
 
 
-def __generate_url(search_type, query, page=0):
+def __get_data_from_mymoviedb(search_type, query, page=0):
     """
         génère une url pour obtenir les résultats de my movie db, interroge le site et retourne le json
-        search_type fait référence au type de recherche indiqué par search_db
-        query est la donnée à passer en paramètre pour certaines recherche id de film, chaine de caractère à chercher...)
-        page est la page de recherche à obtenir pour les recherches avec plusieurs pages
+        :param search_type: fait référence au type de recherche indiqué par search_db
+        :param query: est la donnée à passer en paramètre pour certaines recherche id de film, chaine de caractère à chercher...)
+        :param page: est la page de recherche à obtenir pour les recherches avec plusieurs pages
     """
     url_asking = __root_adress_db
 
@@ -107,7 +112,8 @@ def __generate_url(search_type, query, page=0):
 def get_affiche(adresse):
     """
         retourne l'image de l'affiche à partir de son adresse
-        adresse étant l'adresse web de l'image
+        :param adresse: étant l'adresse web de l'image
+        retourne l'affiche ou en cas d'erreur l'affiche par défaut
     """
     try:
         response = requests.get(__root_adress_affiche + adresse)
@@ -119,12 +125,13 @@ def get_affiche(adresse):
 def get_data(search_type, query, page=0):
     """
         permet d'obtenir les résultats en appelant une recherche sur myMovieDb
-        search_type fait référence au type de recherche indiqué par search_db
-        query est la donnée à passer en paramètre pour certaines recherche id de film, chaine de caractère à chercher...)
-        page est la page de recherche à obtenir pour les recherches avec plusieurs pages
+        :param search_type: fait référence au type de recherche indiqué par search_db
+        :param query: est la donnée à passer en paramètre pour certaines recherche id de film, chaine de caractère à chercher...)
+        :param page: est la page de recherche à obtenir pour les recherches avec plusieurs pages
+        :return retourne la liste des résultats en cas de recherche, ou un tuple film casting, affiche pour des données précise de film/série
     """
     # récupération des données d'internet
-    data = __generate_url(search_type, query, page)
+    data = __get_data_from_mymoviedb(search_type, query, page)
 
     # en cas de recherche
     if search_type in [search_db['SEARCH_MOVIE'], search_db['SEARCH_TV']]:
@@ -138,7 +145,7 @@ def get_data(search_type, query, page=0):
 
     # en cas de recherche de film ou de série
     if search_type in [search_db['GET_TV'], search_db['GET_MOVIE']]:
-        casting = __generate_url(search_db['ASK_CASTING_TV']
+        casting = __get_data_from_mymoviedb(search_db['ASK_CASTING_TV']
                                  if search_type == search_db['GET_TV'] else
                                  search_db['ASK_CASTING_MOVIE'], data['id'])
         return data, casting, get_affiche(data['poster_path'])
@@ -147,6 +154,9 @@ def get_data(search_type, query, page=0):
 def get_popular_movie(type_recherche,page):
     """
         Retourne une liste de série ou de film/série populaire ou du moment 
+        :param type_recherche: le type de recherche à effectuer
+        :param page: la page de résultats
+        :return une liste de résultats
     """
-    results = __generate_url(type_recherche, None, page)
+    results = __get_data_from_mymoviedb(type_recherche, None, page)
     return results
