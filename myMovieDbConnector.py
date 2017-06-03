@@ -1,7 +1,6 @@
 #!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 from urllib.request import urlopen
-from models import type_film
 import requests
 from PIL import Image
 from io import BytesIO

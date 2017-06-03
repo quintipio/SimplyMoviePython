@@ -2,7 +2,8 @@
 # -*-coding:UTF-8 -*
 import tkinter as tk
 from tkinter import messagebox
-from models import get_film, get_type, supprimer_film, type_film, verifier_film_en_base
+from models import get_film, get_type, supprimer_film, type_film, verifier_film_en_base,\
+    passer_film_to_achete, passer_film_to_vue_or_voir
 from myMovieDbConnector import get_data, search_db
 from PIL import Image, ImageTk
 from resizeimage import resizeimage
@@ -209,8 +210,18 @@ class vueConsulterFilm(tk.Frame):
         # collection
         if film['collection'] is not None:
             self.label_collection = tk.Label(self, text=('De la collection : ' + film['collection']['titre']))
-        # bouton supprimer
-        self.button_supprimer = tk.Button(self, text="Supprimer", command=lambda: self.supprimer_film(film['id']))
+        # boutons
+        self.frame_boutons = tk.Frame(self)
+        self.button_supprimer = tk.Button(self.frame_boutons, text="Supprimer", padx=2,
+                                          command=lambda: self.supprimer_film(film['id']))
+        self.button_supprimer.pack(side=tk.LEFT)
+        self.button_vu = tk.Button(self.frame_boutons, text="Vu !" if film['a_voir'] is True else 'A voir !', padx=2,
+                                       command=lambda: self.film_vu(film['id']))
+        self.button_vu.pack(side=tk.LEFT)
+        if film['a_acheter'] is True :
+            self.button_achete = tk.Button(self.frame_boutons, text="Acheté !", padx=2,
+                                           command=lambda: self.film_achete(film['id']))
+            self.button_achete.pack(side=tk.LEFT)
         # histoire
         self.label_synopsis = tk.Label(self, text=film['synopsis'], wraplength=500, pady=10)
         # genres
@@ -286,10 +297,21 @@ class vueConsulterFilm(tk.Frame):
             self.frame_producteurs.grid(row=10, column=1)
         if len(film['realisateurs']) > 0:
             self.frame_realisateurs.grid(row=11, column=1)
-        self.button_supprimer.grid(row=12, column=0)
+        self.frame_boutons.grid(row=12, column=0)
         if len(film['acteurs']) > 0:
             self.frame_acteurs.grid(row=13, column=0, columnspan=2)
         self.label_synopsis.grid(row=14, column=0, columnspan=2)
+
+    def film_vu(self, id):
+        nouvelle_valeur = passer_film_to_vue_or_voir(id)
+        self.fenetre_appelante.recherche_liste_film()
+        self.label_a_voir['text'] = 'A voir : ' + ('Oui' if nouvelle_valeur is True else 'Non')
+        self.button_vu['text'] = 'Vu !' if nouvelle_valeur is True else 'A voir !'
+
+    def film_achete(self, id):
+        passer_film_to_achete(id)
+        self.fenetre_appelante.recherche_liste_film()
+        self.button_achete.forget()
 
     def supprimer_film(self, id):
         """

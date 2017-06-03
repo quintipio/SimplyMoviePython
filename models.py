@@ -127,6 +127,16 @@ def __convert_image_to_byte_array(image):
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
 
+@db_session
+def passer_film_to_achete(id):
+    Film[id].a_acheter = False
+
+@db_session
+def passer_film_to_vue_or_voir(id):
+    film = Film[id]
+    retour = not film.a_voir
+    Film[id].a_voir = retour
+    return retour
 
 @db_session
 def get_liste_film(type_recherche_param, type_film_param, page_num, page_size):
