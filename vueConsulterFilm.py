@@ -1,6 +1,7 @@
 #!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 from models import get_film, get_type, supprimer_film, type_film, verifier_film_en_base,\
     passer_film_to_achete, passer_film_to_vue_or_voir
@@ -17,7 +18,7 @@ mode_consultation = {
 }
 
 
-class vueConsulterFilm(tk.Frame):
+class vueConsulterFilm(ttk.Frame):
     """
         Classe de la frame pour consulter un film
     """
@@ -33,7 +34,7 @@ class vueConsulterFilm(tk.Frame):
         :param args: arguments de la frame
         :param kwargs: arguments de la frame
         """
-        tk.Frame.__init__(self, parent, *args, **kwargs)
+        ttk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.fenetre_appelante = fenetre_appelante
         self.mode = mode
@@ -63,47 +64,47 @@ class vueConsulterFilm(tk.Frame):
                 resizeimage.resize_thumbnail(affiche, [400, 200]))
         else:
             image = ImageTk.PhotoImage(resizeimage.resize_thumbnail(Image.open("afficheDefaut.jpg"), [400, 200]))
-        self.label_affiche = tk.Label(self, image=image)
+        self.label_affiche = ttk.Label(self, image=image)
         self.label_affiche.img = image
         # titre
-        self.label_titre = tk.Label(self, text=film['title'] if 'title' in film else film['name'], font='bold 16')
+        self.label_titre = ttk.Label(self, text=film['title'] if 'title' in film else film['name'], font='bold 16')
         # année
         if ('release_date' in film and film['release_date'] is not None) or \
                 ('first_air_date' in film and film['first_air_date'] is not None) :
-            self.label_annee = tk.Label(self, text='Année : '+str(film['release_date'][:4] if 'release_date' in film else
+            self.label_annee = ttk.Label(self, text='Année : '+str(film['release_date'][:4] if 'release_date' in film else
                                                        film['first_air_date'][:4]))
         # durée
         if ('runtime' in film and film['runtime'] is not None) or \
                 ('episode_run_time' in film and film['episode_run_time'] is not None):
-            self.label_duree = tk.Label(self, text='Durée : '+str(film['runtime'] if 'runtime' in film else
+            self.label_duree = ttk.Label(self, text='Durée : '+str(film['runtime'] if 'runtime' in film else
                                                        film['episode_run_time'][:4]))
         # nombre de saisons
         if 'number_of_seasons' in film and film['number_of_seasons'] is not None and film['number_of_seasons'] > 0:
-            self.label_saison = tk.Label(self, text=('Saisons : ' + str(film['number_of_seasons'])))
+            self.label_saison = ttk.Label(self, text=('Saisons : ' + str(film['number_of_seasons'])))
         # note
         if 'vote_average' in film and film['vote_average'] is not None:
-            self.label_note = tk.Label(self, text=str(film['vote_average']) + '/10')
+            self.label_note = ttk.Label(self, text=str(film['vote_average']) + '/10')
         # collection
         if 'belongs_to_collection' in film and film['belongs_to_collection'] is not None:
-            self.label_collection = tk.Label(self, text='Collection : '+str(film['belongs_to_collection']['name']))
+            self.label_collection = ttk.Label(self, text='Collection : '+str(film['belongs_to_collection']['name']))
         # genres
-        self.frame_genres = tk.Frame(self)
-        titre_lab_genre = tk.Label(self.frame_genres, text='Genres : ', padx=2, font='bold')
+        self.frame_genres = ttk.Frame(self)
+        titre_lab_genre = ttk.Label(self.frame_genres, text='Genres : ', padx=2, font='bold')
         titre_lab_genre.pack(side=tk.LEFT)
         if len(film['genres']) > 0:
             for genre in film['genres']:
-                lab_genre = tk.Label(self.frame_genres, text=genre['name'], padx=2)
+                lab_genre = ttk.Label(self.frame_genres, text=genre['name'], padx=2)
                 lab_genre.pack(side=tk.LEFT)
         # producteurs
         liste_producteurs = [item for item in casting['crew'] if 'producer' in str(item['job']).lower()]
         if len(liste_producteurs) > 0:
             r = 0
             c = 1
-            self.frame_producteurs = tk.Frame(self)
-            titre_lab_producteurs = tk.Label(self.frame_producteurs, text='Producteurs : ', padx=2, font='bold')
+            self.frame_producteurs = ttk.Frame(self)
+            titre_lab_producteurs = ttk.Label(self.frame_producteurs, text='Producteurs : ', padx=2, font='bold')
             titre_lab_producteurs.grid(row=0, column=0)
             for producteur in liste_producteurs:
-                lab_producteur = tk.Label(self.frame_producteurs, text=producteur['name'], padx=2)
+                lab_producteur = ttk.Label(self.frame_producteurs, text=producteur['name'], padx=2)
                 lab_producteur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
@@ -114,11 +115,11 @@ class vueConsulterFilm(tk.Frame):
         if len(liste_realisateurs) > 0:
             r = 0
             c = 1
-            self.frame_realisateurs = tk.Frame(self)
-            titre_lab_realisateurs = tk.Label(self.frame_realisateurs, text='Réalisateurs : ', padx=2, font='bold')
+            self.frame_realisateurs = ttk.Frame(self)
+            titre_lab_realisateurs = ttk.Label(self.frame_realisateurs, text='Réalisateurs : ', padx=2, font='bold')
             titre_lab_realisateurs.grid(row=0, column=0)
             for realisateur in liste_realisateurs:
-                lab_realisateur = tk.Label(self.frame_realisateurs, text=realisateur['name'], padx=2)
+                lab_realisateur = ttk.Label(self.frame_realisateurs, text=realisateur['name'], padx=2)
                 lab_realisateur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
@@ -128,24 +129,24 @@ class vueConsulterFilm(tk.Frame):
         if len(casting['cast']) > 0:
             r = 0
             c = 1
-            self.frame_acteurs = tk.Frame(self)
-            titre_lab_acteurs = tk.Label(self.frame_acteurs, text='Acteurs : ', padx=2, font='bold')
+            self.frame_acteurs = ttk.Frame(self)
+            titre_lab_acteurs = ttk.Label(self.frame_acteurs, text='Acteurs : ', padx=2, font='bold')
             titre_lab_acteurs.grid(row=0, column=0)
             for acteur in casting['cast'][:10]:
-                lab_acteur = tk.Label(self.frame_acteurs, text=(acteur['name'] + '(' + acteur['character'] + ')'), padx=2)
+                lab_acteur = ttk.Label(self.frame_acteurs, text=(acteur['name'] + '(' + acteur['character'] + ')'), padx=2)
                 lab_acteur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
                     c = 0
                     r += 1
         # bouton d'ajout en base
-        self.button_ajout = tk.Button(self, text="Ajouter à la bibliothèque",
+        self.button_ajout = ttk.Button(self, text="Ajouter à la bibliothèque",
                                       command=lambda: self.ajouter_film(film['id'],
                                                                         film['title'] if 'title' in film
                                                                         else film['name']
                                                                         , affiche))
         # histoire
-        self.label_synopsis = tk.Label(self, text=film['overview'], wraplength=500, pady=10)
+        self.label_synopsis = ttk.Label(self, text=film['overview'], wraplength=500, pady=10)
 
         # affichage des élements
         self.label_affiche.grid(row=0, column=0, rowspan=9)
@@ -185,62 +186,62 @@ class vueConsulterFilm(tk.Frame):
                 resizeimage.resize_thumbnail(Image.open(io.BytesIO(film['affiche'])), [400, 200]))
         else:
             image = ImageTk.PhotoImage(resizeimage.resize_thumbnail(Image.open("afficheDefaut.jpg"), [400, 200]))
-        self.label_affiche = tk.Label(self, image=image)
+        self.label_affiche = ttk.Label(self, image=image)
         self.label_affiche.img = image
         # titre
-        self.label_titre = tk.Label(self, text=film['titre'], font='bold 16')
+        self.label_titre = ttk.Label(self, text=film['titre'], font='bold 16')
         # annee
         if film['annee'] is not None:
-            self.label_annee = tk.Label(self, text=str(film['annee']))
+            self.label_annee = ttk.Label(self, text=str(film['annee']))
         # duree
         if film['duree'] is not None:
-            self.label_duree = tk.Label(self, text=('Durée : ' + str(film['duree']) + ' minutes'))
+            self.label_duree = ttk.Label(self, text=('Durée : ' + str(film['duree']) + ' minutes'))
         # saison
         if film['saison'] is not None and film['saison'] > 0:
-            self.label_saison = tk.Label(self, text=('Saisons : ' + str(film['saison'])))
+            self.label_saison = ttk.Label(self, text=('Saisons : ' + str(film['saison'])))
         # note générale
         if film['note_gen'] is not None:
-            self.label_note = tk.Label(self, text=str(film['note_gen']) + '/10')
+            self.label_note = ttk.Label(self, text=str(film['note_gen']) + '/10')
         # le type de film
-        self.label_type = tk.Label(self, text=get_type(film['type']))
+        self.label_type = ttk.Label(self, text=get_type(film['type']))
         # est à acheter ou non
-        self.label_a_acheter = tk.Label(self, text=('A acheter : ' + ('Oui' if film['a_acheter'] is True else 'Non')))
+        self.label_a_acheter = ttk.Label(self, text=('A acheter : ' + ('Oui' if film['a_acheter'] is True else 'Non')))
         # est à voir
-        self.label_a_voir = tk.Label(self, text=('A voir : ' + ('Oui' if film['a_voir'] is True else 'Non')))
+        self.label_a_voir = ttk.Label(self, text=('A voir : ' + ('Oui' if film['a_voir'] is True else 'Non')))
         # collection
         if film['collection'] is not None:
-            self.label_collection = tk.Label(self, text=('De la collection : ' + film['collection']['titre']))
+            self.label_collection = ttk.Label(self, text=('De la collection : ' + film['collection']['titre']))
         # boutons
-        self.frame_boutons = tk.Frame(self)
-        self.button_supprimer = tk.Button(self.frame_boutons, text="Supprimer", padx=2,
+        self.frame_boutons = ttk.Frame(self)
+        self.button_supprimer = ttk.Button(self.frame_boutons, text="Supprimer",
                                           command=lambda: self.supprimer_film(film['id']))
         self.button_supprimer.pack(side=tk.LEFT)
-        self.button_vu = tk.Button(self.frame_boutons, text="Vu !" if film['a_voir'] is True else 'A voir !', padx=2,
+        self.button_vu = ttk.Button(self.frame_boutons, text="Vu !" if film['a_voir'] is True else 'A voir !',
                                        command=lambda: self.film_vu(film['id']))
         self.button_vu.pack(side=tk.LEFT)
         if film['a_acheter'] is True :
-            self.button_achete = tk.Button(self.frame_boutons, text="Acheté !", padx=2,
+            self.button_achete = ttk.Button(self.frame_boutons, text="Acheté !",
                                            command=lambda: self.film_achete(film['id']))
             self.button_achete.pack(side=tk.LEFT)
         # histoire
-        self.label_synopsis = tk.Label(self, text=film['synopsis'], wraplength=500, pady=10)
+        self.label_synopsis = ttk.Label(self, text=film['synopsis'], wraplength=500)
         # genres
-        self.frame_genres = tk.Frame(self)
-        titre_lab_genre = tk.Label(self.frame_genres, text='Genres : ', padx=2, font='bold')
+        self.frame_genres = ttk.Frame(self)
+        titre_lab_genre = ttk.Label(self.frame_genres, text='Genres : ', font='bold')
         titre_lab_genre.pack(side=tk.LEFT)
         if len(film['genres']) > 0:
             for genre in film['genres']:
-                lab_genre = tk.Label(self.frame_genres, text=genre['titre'], padx=2)
+                lab_genre = ttk.Label(self.frame_genres, text=genre['titre'])
                 lab_genre.pack(side=tk.LEFT)
         # producteurs
         if len(film['producteurs']) > 0:
             r = 0
             c = 1
-            self.frame_producteurs = tk.Frame(self)
-            titre_lab_producteurs = tk.Label(self.frame_producteurs, text='Producteurs : ', padx=2, font='bold')
+            self.frame_producteurs = ttk.Frame(self)
+            titre_lab_producteurs = ttk.Label(self.frame_producteurs, text='Producteurs : ', font='bold')
             titre_lab_producteurs.grid(row=0, column=0)
             for producteur in film['producteurs']:
-                lab_producteur = tk.Label(self.frame_producteurs, text=producteur['nom'], padx=2)
+                lab_producteur = ttk.Label(self.frame_producteurs, text=producteur['nom'])
                 lab_producteur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
@@ -250,11 +251,11 @@ class vueConsulterFilm(tk.Frame):
         if len(film['realisateurs']) > 0:
             r = 0
             c = 1
-            self.frame_realisateurs = tk.Frame(self)
-            titre_lab_realisateurs = tk.Label(self.frame_realisateurs, text='Réalisateurs : ', padx=2, font='bold')
+            self.frame_realisateurs = ttk.Frame(self)
+            titre_lab_realisateurs = ttk.Label(self.frame_realisateurs, text='Réalisateurs : ', font='bold')
             titre_lab_realisateurs.grid(row=0, column=0)
             for realisateur in film['realisateurs']:
-                lab_realisateur = tk.Label(self.frame_realisateurs, text=realisateur['nom'], padx=2)
+                lab_realisateur = ttk.Label(self.frame_realisateurs, text=realisateur['nom'])
                 lab_realisateur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
@@ -264,11 +265,11 @@ class vueConsulterFilm(tk.Frame):
         if len(film['acteurs']) > 0:
             r = 0
             c = 1
-            self.frame_acteurs = tk.Frame(self)
-            titre_lab_acteurs = tk.Label(self.frame_acteurs, text='Acteurs : ', padx=2, font='bold')
+            self.frame_acteurs = ttk.Frame(self)
+            titre_lab_acteurs = ttk.Label(self.frame_acteurs, text='Acteurs : ', font='bold')
             titre_lab_acteurs.grid(row=0, column=0)
             for acteur in film['acteurs']:
-                lab_acteur = tk.Label(self.frame_acteurs, text=(acteur['nom'] + '(' + acteur['role'] + ')'), padx=2)
+                lab_acteur = ttk.Label(self.frame_acteurs, text=(acteur['nom'] + '(' + acteur['role'] + ')'))
                 lab_acteur.grid(row=r, column=c)
                 c += 1
                 if c is 4:

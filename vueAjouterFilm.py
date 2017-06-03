@@ -1,6 +1,7 @@
 #!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 from models import type_film, ajouter_film, ajouter_film_basique
 from myMovieDbConnector import get_data, search_db, get_affiche
@@ -8,7 +9,7 @@ from resizeimage import resizeimage
 from PIL import Image, ImageTk
 
 
-class vueAjouterFilm(tk.Frame):
+class vueAjouterFilm(ttk.Frame):
     """
         Module pour la fenêtre de recherche et d'ajout de films par internet
     """
@@ -19,20 +20,20 @@ class vueAjouterFilm(tk.Frame):
         :param args: argument de la frame
         :param kwargs: arguments de la frame
         """
-        tk.Frame.__init__(self, parent, *args, **kwargs)
+        ttk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.to_destroy = None
         # frames des informations complémentaires
-        self.frame_infos = tk.LabelFrame(self, text="Informations supplémentaires", padx=20, pady=20)
-        self.frame_upper = tk.LabelFrame(self.frame_infos)
-        self.frame_etat = tk.Frame(self.frame_upper, borderwidth=2, relief=tk.GROOVE)
-        self.frame_type = tk.Frame(self.frame_upper, borderwidth=2, relief=tk.GROOVE)
+        self.frame_infos = ttk.LabelFrame(self, text="Informations supplémentaires")
+        self.frame_upper = ttk.LabelFrame(self.frame_infos)
+        self.frame_etat = ttk.Frame(self.frame_upper, borderwidth=2, relief=tk.GROOVE)
+        self.frame_type = ttk.Frame(self.frame_upper, borderwidth=2, relief=tk.GROOVE)
 
         # checkbox à voir / à acheter 
         self.var_a_acheter = tk.BooleanVar()
         self.var_a_voir = tk.BooleanVar()
-        self.checkbox_a_acheter =tk.Checkbutton(self.frame_etat, text="A acheter",onvalue=True,offvalue=False,variable=self.var_a_acheter)
-        self.checkbox_a_voir = tk.Checkbutton(self.frame_etat, text="A voir",onvalue=True,offvalue=False,variable=self.var_a_voir)
+        self.checkbox_a_acheter =ttk.Checkbutton(self.frame_etat, text="A acheter",onvalue=True,offvalue=False,variable=self.var_a_acheter)
+        self.checkbox_a_voir = ttk.Checkbutton(self.frame_etat, text="A voir",onvalue=True,offvalue=False,variable=self.var_a_voir)
 
         # type de film
         self.var = tk.IntVar(value=type_film['FILM'])
@@ -44,10 +45,10 @@ class vueAjouterFilm(tk.Frame):
         
         # textbox de recherche
         self.value_titre = tk.StringVar()
-        self.entree_titre = tk.Entry(self.frame_infos, textvariable=self.value_titre, width=30)
+        self.entree_titre = ttk.Entry(self.frame_infos, textvariable=self.value_titre, width=30)
 
         #bouton de recherche
-        self.rechercher_bouton = tk.Button(self.frame_infos, text="Rechercher",command=self.lancer_recherche)
+        self.rechercher_bouton = ttk.Button(self.frame_infos, text="Rechercher",command=self.lancer_recherche)
 
         #mise en place des éléments
         self.checkbox_a_acheter.pack(anchor=tk.W)
@@ -65,9 +66,9 @@ class vueAjouterFilm(tk.Frame):
         self.frame_infos.pack(fill="both", expand="yes", side=tk.TOP)
 
         # éléments supplémentaires de la vue pas encore affiché
-        self.frame_resulat = tk.Frame(self)
+        self.frame_resulat = ttk.Frame(self)
         self.liste_film = tk.Listbox(self.frame_resulat,width=30,height=10)
-        self.frame_affiche_movie = tk.Frame(self.frame_resulat)
+        self.frame_affiche_movie = ttk.Frame(self.frame_resulat)
 
         # scrollbar liste_film
         self.scrollbar_liste = tk.Scrollbar(self.frame_resulat)
@@ -108,12 +109,12 @@ class vueAjouterFilm(tk.Frame):
         self.frame_resulat.pack()
 
         # affichage du résultat
-        self.frame_affiche_movie = tk.Frame(self.frame_resulat)
+        self.frame_affiche_movie = ttk.Frame(self.frame_resulat)
 
         img = ImageTk.PhotoImage(resizeimage.resize_thumbnail(affiche, [400, 200]))
-        self.bouton_ajouter = tk.Button(self.frame_affiche_movie, text="Ajouter à ma collection",
+        self.bouton_ajouter = ttk.Button(self.frame_affiche_movie, text="Ajouter à ma collection",
                                         command=lambda: self.ajouterFilm(film_id))
-        self.label = tk.Label(self.frame_affiche_movie, image=img)
+        self.label = ttk.Label(self.frame_affiche_movie, image=img)
         self.label.image = img
         self.label.pack(side=tk.TOP)
         self.frame_affiche_movie.pack(side=tk.RIGHT)
@@ -151,11 +152,11 @@ class vueAjouterFilm(tk.Frame):
         # destruction de l'ancien résultat
         self.frame_affiche_movie.destroy()
         # affichage des nouveaux
-        self.frame_affiche_movie = tk.Frame(self.frame_resulat)
+        self.frame_affiche_movie = ttk.Frame(self.frame_resulat)
         data = self.liste_resultat[selected_index]
         img = ImageTk.PhotoImage(resizeimage.resize_thumbnail(get_affiche(data[0]), [400, 200]))
-        self.bouton_ajouter = tk.Button(self.frame_affiche_movie,text="Ajouter à ma collection",command= lambda: self.ajouterFilm(data[2]))
-        self.label = tk.Label(self.frame_affiche_movie,image=img)
+        self.bouton_ajouter = ttk.Button(self.frame_affiche_movie,text="Ajouter à ma collection",command= lambda: self.ajouterFilm(data[2]))
+        self.label = ttk.Label(self.frame_affiche_movie,image=img)
         self.label.image = img
         self.label.pack(side=tk.TOP)
         self.frame_affiche_movie.pack(side=tk.RIGHT)

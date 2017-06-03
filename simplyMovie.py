@@ -1,6 +1,7 @@
 #!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 import tkinter as tk
+from tkinter import ttk
 from vuePrincipale import vuePrincipale
 from vueAjouterFilm import vueAjouterFilm
 from models import init_database

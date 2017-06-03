@@ -1,6 +1,7 @@
 #!/usr/bin/env Python
 # -*-coding:UTF-8 -*
 import tkinter as tk
+from tkinter import ttk
 from models import type_recherche, get_liste_film, count_liste_film, type_film
 from myMovieDbConnector import get_search_general, search_db
 from vueConsulterFilm import vueConsulterFilm, mode_consultation
@@ -8,7 +9,7 @@ from vueConsulterFilm import vueConsulterFilm, mode_consultation
 resultat_par_page = 20
 
 
-class vuePrincipale(tk.Frame):
+class vuePrincipale(ttk.Frame):
     """
         Module pour la fenêtre principale d'affichage des films
      """
@@ -20,14 +21,14 @@ class vuePrincipale(tk.Frame):
         :param args: arguments de la frame
         :param kwargs: arguments de la frame
         """
-        tk.Frame.__init__(self, parent, *args, **kwargs)
+        ttk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.page_en_cours = 1
         # recherche principale
-        self.frame_champ_recherche = tk.Frame(self)
+        self.frame_champ_recherche = ttk.Frame(self)
         self.var_recherche = tk.StringVar()
-        self.recherche_entry = tk.Entry(self.frame_champ_recherche, textvariable=self.var_recherche, width=30)
-        self.button_recherche = tk.Button(self.frame_champ_recherche, text="Rechercher",
+        self.recherche_entry = ttk.Entry(self.frame_champ_recherche, textvariable=self.var_recherche, width=30)
+        self.button_recherche = ttk.Button(self.frame_champ_recherche, text="Rechercher",
                                           command=lambda: self.lancer_recherche_general())
         self.recherche_entry.pack(side=tk.LEFT)
         self.button_recherche.pack(side=tk.RIGHT)
@@ -49,11 +50,11 @@ class vuePrincipale(tk.Frame):
         self.liste_vue_principale.select_set(0)
 
         # frame des résultats initialisation
-        self.frame_result = tk.Frame(self)
-        self.frame_pagination = tk.Frame(self.frame_result)
-        self.button_precedent = tk.Button(self.frame_pagination)
-        self.button_suivant = tk.Button(self.frame_pagination)
-        self.label_page_en_cours = tk.Label(self.frame_pagination)
+        self.frame_result = ttk.Frame(self)
+        self.frame_pagination = ttk.Frame(self.frame_result)
+        self.button_precedent = ttk.Button(self.frame_pagination)
+        self.button_suivant = ttk.Button(self.frame_pagination)
+        self.label_page_en_cours = ttk.Label(self.frame_pagination)
 
         # mise en place
         self.frame_champ_recherche.grid(row=0,column=0,columnspan=2)
@@ -135,7 +136,7 @@ class vuePrincipale(tk.Frame):
         """
         # on efface la frame des résultats
         self.frame_result.destroy()
-        self.frame_result = tk.Frame(self)
+        self.frame_result = ttk.Frame(self)
         self.frame_result.grid(row=2, column=0, columnspan=2)
 
         # mise en place des nouveaux résultats
@@ -149,14 +150,14 @@ class vuePrincipale(tk.Frame):
             else:
                 type_consult = type
             if mode is mode_consultation['LOCAL']:
-                label_titre = tk.Label(self.frame_result, text=film.titre)
-                label_annee = tk.Label(self.frame_result, text=film.annee)
-                consulter_bouton = tk.Button(self.frame_result, text="Consulter",
+                label_titre = ttk.Label(self.frame_result, text=film.titre)
+                label_annee = ttk.Label(self.frame_result, text=film.annee)
+                consulter_bouton = ttk.Button(self.frame_result, text="Consulter",
                                              command=lambda arg=(film.id, type_consult, mode_consultation['LOCAL']):
                                              self.consulter_film(arg))
             elif mode is mode_consultation['INTERNET']:
-                label_titre = tk.Label(self.frame_result, text=film['title'] if 'title' in film else film['name'])
-                consulter_bouton = tk.Button(self.frame_result, text="Consulter",
+                label_titre = ttk.Label(self.frame_result, text=film['title'] if 'title' in film else film['name'])
+                consulter_bouton = ttk.Button(self.frame_result, text="Consulter",
                                              command=lambda arg=(film['id'], type_consult, mode_consultation['INTERNET']):
                                              self.consulter_film(arg))
             label_titre.grid(row=i, column=0)
@@ -169,12 +170,12 @@ class vuePrincipale(tk.Frame):
             i += 1
 
         # mise en place de la pagination
-        self.frame_pagination = tk.Frame(self.frame_result)
-        self.button_precedent = tk.Button(self.frame_pagination, text="Précédent",
+        self.frame_pagination = ttk.Frame(self.frame_result)
+        self.button_precedent = ttk.Button(self.frame_pagination, text="Précédent",
                                           command=lambda: self.pagination_precedent())
-        self.button_suivant = tk.Button(self.frame_pagination, text="Suivant",
+        self.button_suivant = ttk.Button(self.frame_pagination, text="Suivant",
                                         command=lambda: self.pagination_suivant())
-        self.label_page_en_cours = tk.Label(self.frame_pagination,
+        self.label_page_en_cours = ttk.Label(self.frame_pagination,
                                             text='Page ' + str(self.page_en_cours) + '/' + str(nombre_page) + '(' + str(
                                                 nombre_resultat) + ' films)')
 
