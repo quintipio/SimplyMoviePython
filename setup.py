@@ -12,12 +12,13 @@ if sys.platform == "win32":
     base = "Win32GUI"
     # base = "console"
 
-build_exe_options = {"packages": ["tkinter","resizeimage", "pony.orm", "os", "io", "urllib", "requests", "PIL", "json"],
+build_exe_options = {"packages": ["tkinter","resizeimage", "pony.orm", "os", "io", "urllib", "requests", "PIL", "json",
+                                    "models", "myMovieDbConnector", "vueAjouterFilm", "vueConsulterFilm", "vuePrincipale"],
                      "excludes": ["PyQt5","pyqt5-tools"],
                      "includes": [],
                      "include_files": ["afficheDefaut.jpg",
                                        r"D:\Logiciel\Python\DLLs\tcl86t.dll",
-                                       r"D:\Logiciel\Python\DLLs\tk86t.dll"]
+                                       r"D:\Logiciel\Python\DLLs\tk86t.dll",]
                      }
 
 setup(

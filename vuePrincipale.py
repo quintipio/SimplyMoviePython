@@ -2,6 +2,7 @@
 # -*-coding:UTF-8 -*
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from models import type_recherche, get_liste_film, count_liste_film, type_film
 from myMovieDbConnector import get_search_general, search_db
 from vueConsulterFilm import vueConsulterFilm, mode_consultation
@@ -70,8 +71,12 @@ class vuePrincipale(ttk.Frame):
         """
         Lance une recherche générale sur les séries et films
         """
+        self.page_en_cours = 1
         results = get_search_general(search_db['GENERAL_SEARCH'], self.page_en_cours, query=self.var_recherche.get())
-        self.charger_resultats(results, results['total_results'], results['total_pages'], mode_consultation['INTERNET'], type=None)
+        if results is not None and results['total_results'] > 0 :
+            self.charger_resultats(results, results['total_results'], results['total_pages'], mode_consultation['INTERNET'], type=None)
+        else :
+            messagebox.showwarning(title="Aucun résultat",message="Aucun résultat")
 
     def event_for_recherche(self):
         """
@@ -157,9 +162,12 @@ class vuePrincipale(ttk.Frame):
                                              self.consulter_film(arg))
             elif mode is mode_consultation['INTERNET']:
                 label_titre = ttk.Label(self.frame_result, text=film['title'] if 'title' in film else film['name'])
-                consulter_bouton = ttk.Button(self.frame_result, text="Consulter",
-                                             command=lambda arg=(film['id'], type_consult, mode_consultation['INTERNET']):
-                                             self.consulter_film(arg))
+                if mode is mode_consultation['LOCAL'] or (mode is mode_consultation['INTERNET']
+                                                          and 'media_type' not in film or
+                                                              ('media_type' in film and film['media_type'] != 'person')):
+                    consulter_bouton = ttk.Button(self.frame_result, text="Consulter",
+                                                  command=lambda arg=(film['id'], type_consult,
+                                                                      mode_consultation['INTERNET']):self.consulter_film(arg))
             label_titre.grid(row=i, column=0)
             if mode is mode_consultation['LOCAL']:
                 label_annee.grid(row=i, column=1)

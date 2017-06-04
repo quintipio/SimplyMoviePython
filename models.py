@@ -111,7 +111,7 @@ def init_database():
     """
         Initialisation de la base de donnée et création au besoin
     """
-    database.bind("sqlite", "simplyMovie.sqlite", create_db=True)
+    database.bind("sqlite", r"simplyMovie.sqlite", create_db=True)
     database.generate_mapping(create_tables=True)
     sql_debug(False)
 
