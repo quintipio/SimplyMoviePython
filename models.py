@@ -113,7 +113,7 @@ def init_database():
     """
     database.bind("sqlite", "simplyMovie.sqlite", create_db=True)
     database.generate_mapping(create_tables=True)
-    sql_debug(True)
+    sql_debug(False)
 
 
 def __convert_image_to_byte_array(image):
@@ -231,6 +231,20 @@ def get_film(id):
     retour['acteurs'] = list_acteurs
     return retour
 
+@db_session
+def get_film_by_idinternet(id_internet, type):
+    """
+    Retourne un film en base à partir de son id internet et de son type
+    :param id_internet: l'id internet du filmà rechercher
+    :param type: le type SERIE ou Non
+    :return: le film trouvé
+    """
+    if type is type_film['SERIE'] :
+        id = select(f.id for f in Film if f.id_internet == id_internet and f.type == type).first()
+        return get_film(id)
+    else:
+        id = select(f.id for f in Film if f.id_internet == id_internet and f.type != type_film['SERIE']).first()
+        return get_film(id)
 
 @db_session
 def supprimer_film(id_film):
@@ -244,12 +258,25 @@ def supprimer_film(id_film):
 @db_session
 def verifier_film_en_base(id_internet, type):
     """
-        vérifie si un film est en base en le recherchant par son id internet
+        vérifie si un film est en base en le recherchant par son id internet et sa catégorie
         :param id_internet: l'id internet du film à rechercher
         :param type : le type de film à rechercher
         :return: True si le film est présent
     """
     return count(f for f in Film if f.id_internet == id_internet and f.type == type) > 0
+
+@db_session
+def verifier_film_en_base_type_simple(id_internet, type):
+    """
+        vérifie si un film est en base en le recherchant par son id internet et sa catégorie (mais seulement serie ou autres genre)
+        :param id_internet: l'id internet du film à rechercher
+        :param type : le type de film à rechercher
+        :return: True si le film est présent
+    """
+    if type is type_film['SERIE'] :
+        return count(f for f in Film if f.id_internet == id_internet and f.type == type) > 0
+    else :
+        return count(f for f in Film if f.id_internet == id_internet) > 0
 
 
 @db_session
@@ -340,7 +367,7 @@ def ajouter_film(data_film, data_casting, type, a_voir, a_acheter, affiche):
         for data_result in data_casting['cast'][:10]:
             roles.append(Role(film=film
                               , personne=(__get_personne(data_result))
-                              , nom_role=data_result['character']))
+                              , nom_role=data_result['character'] if data_result['character'] else "Unknow"))
         return None
     else:
         return "Ce film est déjà présent"

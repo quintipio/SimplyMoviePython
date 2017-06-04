@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from models import get_film, get_type, supprimer_film, type_film, verifier_film_en_base,\
-    passer_film_to_achete, passer_film_to_vue_or_voir
+    passer_film_to_achete, passer_film_to_vue_or_voir, verifier_film_en_base_type_simple,get_film_by_idinternet
 from myMovieDbConnector import get_data, search_db
 from PIL import Image, ImageTk
 from resizeimage import resizeimage
@@ -45,11 +45,16 @@ class vueConsulterFilm(ttk.Frame):
             film = get_film(id_film)
             self.afficher_film_local(film)
         if mode is mode_consultation['INTERNET']:
-            if type is type_film['SERIE'] :
-                film, casting, affiche = get_data(search_db['GET_TV'],id_film)
-            else:
-                film, casting, affiche = get_data(search_db['GET_MOVIE'], id_film)
-            self.afficher_film_internet(film, casting, affiche)
+            if verifier_film_en_base_type_simple(id_film, type):
+                film = get_film_by_idinternet(id_film, type)
+                mode = mode_consultation['LOCAL']
+                self.afficher_film_local(film)
+            else :
+                if type is type_film['SERIE']:
+                    film, casting, affiche = get_data(search_db['GET_TV'],id_film)
+                else:
+                    film, casting, affiche = get_data(search_db['GET_MOVIE'], id_film)
+                self.afficher_film_internet(film, casting, affiche)
 
     def afficher_film_internet(self, film, casting, affiche):
         """
@@ -89,11 +94,11 @@ class vueConsulterFilm(ttk.Frame):
             self.label_collection = ttk.Label(self, text='Collection : '+str(film['belongs_to_collection']['name']))
         # genres
         self.frame_genres = ttk.Frame(self)
-        titre_lab_genre = ttk.Label(self.frame_genres, text='Genres : ', padx=2, font='bold')
+        titre_lab_genre = ttk.Label(self.frame_genres, text='Genres : ', font='bold')
         titre_lab_genre.pack(side=tk.LEFT)
         if len(film['genres']) > 0:
             for genre in film['genres']:
-                lab_genre = ttk.Label(self.frame_genres, text=genre['name'], padx=2)
+                lab_genre = ttk.Label(self.frame_genres, text=genre['name'])
                 lab_genre.pack(side=tk.LEFT)
         # producteurs
         liste_producteurs = [item for item in casting['crew'] if 'producer' in str(item['job']).lower()]
@@ -101,10 +106,10 @@ class vueConsulterFilm(ttk.Frame):
             r = 0
             c = 1
             self.frame_producteurs = ttk.Frame(self)
-            titre_lab_producteurs = ttk.Label(self.frame_producteurs, text='Producteurs : ', padx=2, font='bold')
+            titre_lab_producteurs = ttk.Label(self.frame_producteurs, text='Producteurs : ', font='bold')
             titre_lab_producteurs.grid(row=0, column=0)
             for producteur in liste_producteurs:
-                lab_producteur = ttk.Label(self.frame_producteurs, text=producteur['name'], padx=2)
+                lab_producteur = ttk.Label(self.frame_producteurs, text=producteur['name'])
                 lab_producteur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
@@ -116,10 +121,10 @@ class vueConsulterFilm(ttk.Frame):
             r = 0
             c = 1
             self.frame_realisateurs = ttk.Frame(self)
-            titre_lab_realisateurs = ttk.Label(self.frame_realisateurs, text='Réalisateurs : ', padx=2, font='bold')
+            titre_lab_realisateurs = ttk.Label(self.frame_realisateurs, text='Réalisateurs : ', font='bold')
             titre_lab_realisateurs.grid(row=0, column=0)
             for realisateur in liste_realisateurs:
-                lab_realisateur = ttk.Label(self.frame_realisateurs, text=realisateur['name'], padx=2)
+                lab_realisateur = ttk.Label(self.frame_realisateurs, text=realisateur['name'])
                 lab_realisateur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
@@ -130,10 +135,10 @@ class vueConsulterFilm(ttk.Frame):
             r = 0
             c = 1
             self.frame_acteurs = ttk.Frame(self)
-            titre_lab_acteurs = ttk.Label(self.frame_acteurs, text='Acteurs : ', padx=2, font='bold')
+            titre_lab_acteurs = ttk.Label(self.frame_acteurs, text='Acteurs : ', font='bold')
             titre_lab_acteurs.grid(row=0, column=0)
             for acteur in casting['cast'][:10]:
-                lab_acteur = ttk.Label(self.frame_acteurs, text=(acteur['name'] + '(' + acteur['character'] + ')'), padx=2)
+                lab_acteur = ttk.Label(self.frame_acteurs, text=(acteur['name'] + '(' + acteur['character'] + ')'))
                 lab_acteur.grid(row=r, column=c)
                 c += 1
                 if c is 4:
@@ -146,7 +151,7 @@ class vueConsulterFilm(ttk.Frame):
                                                                         else film['name']
                                                                         , affiche))
         # histoire
-        self.label_synopsis = ttk.Label(self, text=film['overview'], wraplength=500, pady=10)
+        self.label_synopsis = ttk.Label(self, text=film['overview'], wraplength=500)
 
         # affichage des élements
         self.label_affiche.grid(row=0, column=0, rowspan=9)
