@@ -16,7 +16,7 @@ build_exe_options = {"packages": ["tkinter","resizeimage", "pony.orm", "os", "io
                                     "models", "myMovieDbConnector", "vueAjouterFilm", "vueConsulterFilm", "vuePrincipale"],
                      "excludes": ["PyQt5","pyqt5-tools"],
                      "includes": [],
-                     "include_files": ["afficheDefaut.jpg",
+                     "include_files": ["afficheDefaut.jpg","options.properties",
                                        r"D:\Logiciel\Python\DLLs\tcl86t.dll",
                                        r"D:\Logiciel\Python\DLLs\tk86t.dll",]
                      }

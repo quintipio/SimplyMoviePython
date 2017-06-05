@@ -100,8 +100,10 @@ def __get_data_from_mymoviedb(search_type, query, page=0):
                                     search_db['POPULAR_MOVIE'], search_db['POPULAR_TV']]:
         url_asking += "&page={}".format(page)
 
-    url_asking += "&language={}".format(os.getenv('LANG'))
-    url_asking += "&include_image_language={},null".format(os.getenv('LANG'));
+    url_asking += "&language=fr"
+    url_asking += "&include_image_language=fr,null"
+    #url_asking += "&language={}".format(os.getenv('LANG'))
+    #url_asking += "&include_image_language={},null".format(os.getenv('LANG'));
 
     with urlopen(url_asking) as url:
         data = json.loads(url.read().decode())

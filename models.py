@@ -2,9 +2,9 @@
 # -*-coding:UTF-8 -*
 from pony.orm import *
 import io
+import os
 
 database = Database()
-
 # différents roles d'une personne pour un film
 role = {
     'ACTEUR': 1,
@@ -21,7 +21,7 @@ type_film = {
     'ANIMATION': 5
 }
 
-#type de recherche en base
+# type de recherche en base
 type_recherche = {
     'A_VOIR': 1,
     'A_ACHETER': 2,
@@ -107,11 +107,28 @@ class Role(database.Entity):
     PrimaryKey(film, personne)
 
 
+def __get_database_file():
+    cwd = os.getcwd()
+    try:
+        options = {}
+        with open(cwd + "\\" + "options.properties") as f:
+            for line in f:
+                k, v = line.strip().split('=')
+                options[k.strip()] = v.strip()
+        if options['dir'] != 'None':
+            return options['dir']
+        else :
+            return cwd + "\\" + "simplyMovie.sqlite"
+    except:
+        return cwd + "\\" + "simplyMovie.sqlite"
+
+
 def init_database():
     """
         Initialisation de la base de donnée et création au besoin
     """
-    database.bind("sqlite", r"simplyMovie.sqlite", create_db=True)
+    file = __get_database_file()
+    database.bind("sqlite", file, create_db=True)
     database.generate_mapping(create_tables=True)
     sql_debug(False)
 
@@ -127,9 +144,11 @@ def __convert_image_to_byte_array(image):
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
 
+
 @db_session
 def passer_film_to_achete(id):
     Film[id].a_acheter = False
+
 
 @db_session
 def passer_film_to_vue_or_voir(id):
@@ -137,6 +156,7 @@ def passer_film_to_vue_or_voir(id):
     retour = not film.a_voir
     Film[id].a_voir = retour
     return retour
+
 
 @db_session
 def get_liste_film(type_recherche_param, type_film_param, page_num, page_size):
@@ -149,15 +169,16 @@ def get_liste_film(type_recherche_param, type_film_param, page_num, page_size):
         :return une liste de tupe de resultats
     """
     if type_recherche_param is type_recherche['A_VOIR']:
-        result = select(f for f in Film if f.a_voir is True and f.a_acheter is not True and f.type is type_film_param).page(
-            pagenum=page_num, pagesize=page_size)
+        result = select(
+            f for f in Film if f.a_voir is True and f.a_acheter is not True and f.type is type_film_param).order_by(
+            lambda f: f.titre).page(pagenum=page_num, pagesize=page_size)
     elif type_recherche_param is type_recherche['A_ACHETER']:
-        result = select(f for f in Film if f.a_acheter is True and f.type is type_film_param).page(pagenum=page_num,
-                                                                                                   pagesize=page_size)
+        result = select(f for f in Film if f.a_acheter is True and f.type is type_film_param).order_by(
+            lambda f: f.titre).page(pagenum=page_num, pagesize=page_size)
     elif type_recherche_param is 0:
         result = select(
-            f for f in Film if f.a_voir is not True and f.a_acheter is not True and f.type is type_film_param).page(
-            pagenum=page_num, pagesize=page_size)
+            f for f in Film if f.a_voir is not True and f.a_acheter is not True and f.type is type_film_param).order_by(
+            lambda f: f.titre).page(pagenum=page_num, pagesize=page_size)
 
     retour = []
     for tuple in result:
@@ -231,6 +252,7 @@ def get_film(id):
     retour['acteurs'] = list_acteurs
     return retour
 
+
 @db_session
 def get_film_by_idinternet(id_internet, type):
     """
@@ -239,12 +261,13 @@ def get_film_by_idinternet(id_internet, type):
     :param type: le type SERIE ou Non
     :return: le film trouvé
     """
-    if type is type_film['SERIE'] :
+    if type is type_film['SERIE']:
         id = select(f.id for f in Film if f.id_internet == id_internet and f.type == type).first()
         return get_film(id)
     else:
         id = select(f.id for f in Film if f.id_internet == id_internet and f.type != type_film['SERIE']).first()
         return get_film(id)
+
 
 @db_session
 def supprimer_film(id_film):
@@ -265,6 +288,7 @@ def verifier_film_en_base(id_internet, type):
     """
     return count(f for f in Film if f.id_internet == id_internet and f.type == type) > 0
 
+
 @db_session
 def verifier_film_en_base_type_simple(id_internet, type):
     """
@@ -273,9 +297,9 @@ def verifier_film_en_base_type_simple(id_internet, type):
         :param type : le type de film à rechercher
         :return: True si le film est présent
     """
-    if type is type_film['SERIE'] :
+    if type is type_film['SERIE']:
         return count(f for f in Film if f.id_internet == id_internet and f.type == type) > 0
-    else :
+    else:
         return count(f for f in Film if f.id_internet == id_internet) > 0
 
 
@@ -343,13 +367,24 @@ def ajouter_film(data_film, data_casting, type, a_voir, a_acheter, affiche):
         for data_result in data_film['genres']:
             liste_genre.append(__get_genre(data_result))
 
+        duree = None
+        if 'episode_run_time' in data_film:
+            if len(data_film['episode_run_time']) > 0:
+                duree = data_film['episode_run_time'][0]
+        else:
+            duree = data_film['runtime'] if data_film['runtime'] is not None else 0
+
+        synopsys = ""
+        if data_film['overview'] is not None:
+            synopsys = data_film['overview']
+
         film = Film(
             titre=data_film['name'] if type == type_film['SERIE'] else data_film['title'],
-            duree=data_film['episode_run_time'][0] if type == type_film['SERIE'] else data_film['runtime'],
+            duree=duree,
             annee=data_film['first_air_date'][:4] if type == type_film['SERIE'] else data_film['release_date'][:4],
             affiche=__convert_image_to_byte_array(affiche),
             id_internet=data_film['id'],
-            synopsis=data_film['overview'],
+            synopsis=synopsys,
             noteGen=data_film['vote_average'],
             saison=data_film['number_of_seasons'] if type == type_film['SERIE'] else 0,
             genres=liste_genre,
